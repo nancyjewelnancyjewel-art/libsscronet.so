@@ -1,974 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0B111E">
-    <title>Nafsi Admin Console</title>
-    <style>
-        :root {
-            color-scheme: dark;
-            --bg: #0B111E;
-            --surface: #111A2E;
-            --surface-2: #0E1728;
-            --input: #080E19;
-            --line: #253248;
-            --line-soft: rgba(148,163,184,.13);
-            --accent: #10B981;
-            --accent-2: #34D399;
-            --text: #F8FAFC;
-            --sub: #9AAAC0;
-            --muted: #718198;
-            --danger: #F43F5E;
-            --warn: #F59E0B;
-            --blue: #38BDF8;
-            --radius: 18px;
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html { min-height: 100%; background: var(--bg); }
-        body {
-            margin: 0; min-height: 100vh; overflow-x: hidden;
-            padding-bottom: calc(86px + env(safe-area-inset-bottom));
-            background: radial-gradient(ellipse at 50% -15%, rgba(16,185,129,.10), transparent 44%), var(--bg);
-            color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            font-size: 14px; line-height: 1.45; -webkit-font-smoothing: antialiased;
-        }
-        button, input, select, textarea { font: inherit; }
-        button { cursor: pointer; touch-action: manipulation; }
-        input, textarea { user-select: text; -webkit-user-select: text; }
-        .app-shell { width: 100%; max-width: 720px; margin: 0 auto; }
-        .app-bar {
-            position: sticky; top: 0; z-index: 40;
-            display: flex; align-items: center; justify-content: space-between; gap: 12px;
-            min-height: 68px; padding: calc(10px + env(safe-area-inset-top)) 18px 11px;
-            background: rgba(11,17,30,.94); border-bottom: 1px solid var(--line-soft);
-            backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-        }
-        .brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
-        .brand-mark {
-            width: 39px; height: 39px; flex: 0 0 39px; display: grid; place-items: center;
-            border: 1px solid rgba(52,211,153,.38); border-radius: 13px;
-            background: linear-gradient(145deg, rgba(16,185,129,.22), rgba(16,185,129,.06));
-            color: var(--accent-2); font-size: 17px; font-weight: 800; letter-spacing: -.5px;
-        }
-        .app-title { font-size: 14px; font-weight: 750; letter-spacing: .45px; line-height: 1.2; }
-        .app-sub { margin-top: 4px; color: var(--accent-2); font-size: 9px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; }
-        .sync-btn {
-            min-height: 38px; display: inline-flex; align-items: center; gap: 7px;
-            padding: 0 12px; border: 1px solid var(--line); border-radius: 12px;
-            background: var(--surface); color: var(--text); font-size: 11px; font-weight: 700;
-        }
-        .sync-btn:active, .btn:active, .nav-item:active { transform: scale(.97); }
-        .page { display: none; padding: 22px 16px 18px; animation: enter .18s ease-out; }
-        .page.active { display: block; }
-        @keyframes enter { from { opacity: .55; transform: translateY(5px); } to { opacity: 1; transform: none; } }
-        .page-heading { margin: 1px 2px 18px; }
-        .eyebrow { color: var(--accent-2); font-size: 9px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; }
-        .page-title { margin: 5px 0 3px; font-size: 23px; line-height: 1.18; letter-spacing: -.65px; font-weight: 760; }
-        .page-desc { margin: 0; color: var(--sub); font-size: 12px; line-height: 1.55; }
-        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 13px; }
-        .stat-pill {
-            min-width: 0; padding: 15px; border: 1px solid var(--line-soft); border-radius: 16px;
-            background: linear-gradient(145deg, rgba(17,26,46,.98), rgba(14,23,40,.98));
-        }
-        .stat-lbl { color: var(--sub); font-size: 10px; font-weight: 700; letter-spacing: .35px; }
-        .stat-num { margin-top: 5px; color: var(--accent-2); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 25px; line-height: 1; font-weight: 750; font-variant-numeric: tabular-nums; }
-        .card {
-            margin-bottom: 13px; padding: 17px; border: 1px solid var(--line-soft); border-radius: var(--radius);
-            background: linear-gradient(155deg, rgba(17,26,46,.98), rgba(14,23,40,.98));
-            box-shadow: 0 8px 24px rgba(0,0,0,.12);
-        }
-        .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; color: var(--text); font-size: 13px; font-weight: 750; letter-spacing: -.1px; }
-        .card-head small { color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: 0; }
-        .card-note { margin: -6px 0 14px; color: var(--sub); font-size: 11px; line-height: 1.55; }
-        .field { min-width: 0; margin-bottom: 13px; }
-        .field:last-child { margin-bottom: 0; }
-        label { display: block; margin: 0 0 7px; color: #B4C1D3; font-size: 10px; font-weight: 750; letter-spacing: .45px; }
-        input, select, textarea {
-            display: block; width: 100%; min-height: 46px; margin: 0;
-            padding: 12px 13px; outline: none; border: 1px solid var(--line); border-radius: 12px;
-            background: var(--input); color: var(--text); font-size: 14px; line-height: 1.35;
-            appearance: none; -webkit-appearance: none;
-        }
-        input::placeholder, textarea::placeholder { color: #627189; opacity: 1; }
-        input:focus, select:focus, textarea:focus { border-color: rgba(52,211,153,.8); box-shadow: 0 0 0 3px rgba(16,185,129,.10); }
-        textarea { min-height: 88px; resize: vertical; }
-        .mono, .key-code, .key-meta, #generatedKeysBox { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
-        .btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-            min-height: 46px; width: 100%; padding: 0 15px; border: 1px solid transparent; border-radius: 13px;
-            background: var(--accent); color: #041A12; font-size: 12px; font-weight: 800; letter-spacing: .15px;
-            transition: transform .12s ease, opacity .12s ease;
-        }
-        .btn:active { opacity: .9; }
-        .btn-outline { border-color: var(--line); background: #0B1321; color: var(--text); }
-        .btn-sm { width: auto; min-height: 34px; padding: 0 10px; border-radius: 10px; font-size: 10px; font-weight: 750; }
-        .btn-danger { border-color: rgba(244,63,94,.28); background: rgba(244,63,94,.10); color: #FDA4AF; }
-        .btn-warn { border-color: rgba(245,158,11,.28); background: rgba(245,158,11,.10); color: #FCD34D; }
-        .btn-blue { border-color: rgba(56,189,248,.28); background: rgba(56,189,248,.10); color: #7DD3FC; }
-        .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
-        .btn-row .btn { flex: 1 1 130px; }
-        .key-card { margin-bottom: 10px; padding: 14px; border: 1px solid var(--line-soft); border-radius: 15px; background: #0C1524; }
-        .key-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
-        .key-code { min-width: 0; overflow-wrap: anywhere; color: var(--accent-2); font-size: 13px; font-weight: 800; }
-        .badge { flex: 0 0 auto; padding: 4px 8px; border-radius: 7px; font-size: 9px; line-height: 1.2; font-weight: 800; letter-spacing: .25px; }
-        .b-active { background: rgba(16,185,129,.13); color: var(--accent-2); }
-        .b-block { background: rgba(244,63,94,.13); color: #FDA4AF; }
-        .b-exp { background: rgba(245,158,11,.13); color: #FCD34D; }
-        .key-meta { margin-bottom: 11px; color: var(--sub); font-size: 10px; line-height: 1.7; overflow-wrap: anywhere; }
-        .action-bar { display: flex; flex-wrap: wrap; gap: 6px; }
-        .password-select { width: 18px; min-width: 18px; height: 18px; min-height: 18px; margin: 1px 8px 0 0; padding: 0; accent-color: var(--accent); appearance: auto; -webkit-appearance: auto; }
-        .password-card-title { display: flex; align-items: flex-start; min-width: 0; flex: 1; }
-        .password-actions { display: flex; flex-wrap: wrap; gap: 7px; }
-        .btn:disabled { opacity: .38; cursor: not-allowed; transform: none; }
-        .key-card .key-top { align-items: center; }
-        .empty-state { padding: 24px 14px; text-align: center; color: var(--sub); font-size: 12px; }
-        .section-gap { height: 3px; }
-        .helper { margin-top: 6px; color: var(--muted); font-size: 10px; line-height: 1.45; }
-        .control-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid var(--line-soft); }
-        .control-row:first-of-type { border-top: 0; padding-top: 0; }
-        .control-title { color: var(--text); font-size: 12px; font-weight: 700; }
-        .control-desc { margin-top: 3px; color: var(--sub); font-size: 10px; line-height: 1.45; }
-        .control-row select { width: 125px; min-width: 125px; min-height: 40px; padding: 8px 10px; font-size: 11px; }
-        .client-preview { padding: 14px; border: 1px solid rgba(16,185,129,.22); border-radius: 15px; background: rgba(7,11,20,.75); }
-        .preview-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; color: var(--accent-2); font-size: 10px; font-weight: 800; letter-spacing: .7px; }
-        .preview-state { color: var(--text); font-size: 12px; font-weight: 700; }
-        .preview-sub { margin-top: 4px; color: var(--sub); font-size: 10px; }
-        .preview-banner { margin-top: 10px; padding: 9px 10px; border: 1px solid rgba(245,158,11,.25); border-radius: 10px; background: rgba(245,158,11,.07); color: #FCD34D; font-size: 10px; line-height: 1.45; overflow-wrap: anywhere; }
-        .preview-banner.muted { border-color: var(--line-soft); background: transparent; color: var(--muted); }
-        .bottom-nav {
-            position: fixed; z-index: 50; left: 0; right: 0; bottom: 0;
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
-            min-height: calc(67px + env(safe-area-inset-bottom)); padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
-            border-top: 1px solid var(--line-soft); background: rgba(10,16,28,.97);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-        }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 0; border-radius: 12px; color: var(--muted); font-size: 9px; font-weight: 750; letter-spacing: .2px; transition: color .15s ease; }
-        .nav-item.active { color: var(--accent-2); background: rgba(16,185,129,.07); }
-        .nav-icon { display: grid; place-items: center; width: 23px; height: 22px; font-size: 17px; line-height: 1; }
-        .hidden { display: none !important; }
-        #authOverlay {
-            position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
-            padding: 24px; background: rgba(7,11,20,.98); backdrop-filter: blur(18px);
-        }
-        .auth-card { width: 100%; max-width: 380px; padding: 24px 20px; text-align: center; border: 1px solid var(--line); border-radius: 22px; background: linear-gradient(150deg,#142038,#0D1728); box-shadow: 0 24px 70px rgba(0,0,0,.4); }
-        .auth-logo { width: 54px; height: 54px; display: grid; place-items: center; margin: 0 auto 14px; border: 1px solid rgba(52,211,153,.35); border-radius: 18px; background: rgba(16,185,129,.12); color: var(--accent-2); font-size: 23px; font-weight: 850; }
-        .auth-title { margin: 5px 0 17px; font-size: 19px; font-weight: 800; letter-spacing: -.35px; }
-        #masterPin { text-align: center; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: 1px; }
-        #authErr { min-height: 18px; margin-top: 10px; color: #FDA4AF; font-size: 11px; }
-        .sync-caption { margin-top: 12px; color: var(--muted); text-align: center; font-size: 9px; }
-        @media (min-width: 620px) {
-            .page { padding: 26px 24px 22px; }
-            .app-bar { padding-left: 24px; padding-right: 24px; }
-            .stats-row { gap: 13px; }
-            .card { padding: 20px; }
-        }
-        @media (max-width: 360px) {
-            .page { padding-left: 12px; padding-right: 12px; }
-            .card { padding: 14px; }
-            .control-row select { width: 112px; min-width: 112px; }
-            .nav-item { font-size: 8px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0B111E">
+<title>Nafsi Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B111E;--card:#111A2E;--input:#070B14;--line:#1E293B;--green:#10B981;--green2:#34D399;--text:#F8FAFC;--muted:#94A3B8;--red:#F43F5E;--amber:#F59E0B;--blue:#38BDF8}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:78px;overflow-x:hidden}
+button,input,select,textarea{font:inherit}
+.top{position:sticky;top:0;z-index:20;background:rgba(11,17,30,.97);border-bottom:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:16px;font-weight:700;letter-spacing:.2px}.status{font-size:11px;color:var(--green2);margin-top:3px}
+.sync{background:var(--card);color:var(--text);border:1px solid var(--line);padding:9px 12px;border-radius:9px;font-size:12px;font-weight:600}
+.page{display:none;padding:15px 14px 20px}.page.active{display:block;animation:appear .16s ease-out}@keyframes appear{from{opacity:.6;transform:translateY(4px)}to{opacity:1;transform:none}}
+.heading{font-size:18px;font-weight:700;margin:2px 0 5px}.subheading{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px;margin-bottom:13px}
+.card-title{font-size:13px;font-weight:700;margin-bottom:13px;color:var(--text)}
+label{display:block;font-size:11px;color:var(--muted);font-weight:600;margin:0 0 6px}
+input,select,textarea{width:100%;background:var(--input);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:12px;font-size:13px;margin-bottom:12px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}textarea{min-height:70px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field{min-width:0}
+.btn{width:100%;border:0;border-radius:9px;background:var(--green);color:#04150F;padding:13px 12px;font-size:12px;font-weight:700}
+.btn:active,.sync:active,.nav button:active{transform:scale(.985)}
+.btn.secondary{background:var(--input);border:1px solid var(--line);color:var(--text)}
+.btn.danger{background:rgba(244,63,94,.13);border:1px solid rgba(244,63,94,.35);color:#FDA4AF}
+.btn.warn{background:rgba(245,158,11,.13);border:1px solid rgba(245,158,11,.35);color:#FCD34D}
+.btn.blue{background:rgba(56,189,248,.13);border:1px solid rgba(56,189,248,.35);color:#7DD3FC}
+.btn.small{width:auto;padding:8px 10px;font-size:10px;border-radius:7px}
+.result{white-space:pre-wrap;word-break:break-word;background:var(--input);border:1px solid var(--line);border-radius:9px;padding:12px;color:var(--green2);font:12px 'JetBrains Mono',monospace;margin-top:10px}
+.search{margin-bottom:0}
+.key-card{background:var(--input);border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:9px}
+.key-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.key-code{font:600 13px 'JetBrains Mono',monospace;color:var(--green2);word-break:break-all}
+.badge{font-size:9px;font-weight:700;padding:4px 7px;border-radius:6px;white-space:nowrap;background:rgba(16,185,129,.13);color:var(--green2)}
+.badge.block{background:rgba(244,63,94,.13);color:#FDA4AF}.badge.exp{background:rgba(245,158,11,.13);color:#FCD34D}
+.meta{font-size:11px;color:var(--muted);line-height:1.65;word-break:break-word;margin-bottom:9px}
+.actions{display:flex;gap:6px;flex-wrap:wrap}.actions .btn{flex:1 1 auto}
+.empty{padding:18px;text-align:center;color:var(--muted);font-size:12px}
+.confirm-overlay{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;padding:22px}.confirm-box{width:100%;max-width:340px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:17px}.confirm-message{font-size:13px;line-height:1.5;margin-bottom:15px}.confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}.switch-row:last-child{border-bottom:0}
+.switch-copy{font-size:13px;font-weight:600}.switch-copy small{display:block;color:var(--muted);font-size:10px;font-weight:400;margin-top:3px;line-height:1.4}
+.switch{appearance:none;width:44px;height:25px;border-radius:20px;background:#334155;position:relative;cursor:pointer;flex:0 0 44px;margin:0}
+.switch:checked{background:var(--green)}.switch:before{content:"";position:absolute;width:19px;height:19px;top:3px;left:3px;border-radius:50%;background:#fff;transition:.15s}.switch:checked:before{left:22px}
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);background:rgba(11,17,30,.98);border-top:1px solid var(--line);padding:7px 5px max(7px,env(safe-area-inset-bottom))}
+.nav button{border:0;background:transparent;color:var(--muted);font-size:10px;font-weight:600;padding:8px 2px;border-radius:8px}.nav button.active{color:var(--green2);background:rgba(16,185,129,.09)}
+#authOverlay{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;padding:22px}.auth{width:100%;max-width:340px;text-align:center}.auth .card{padding:22px}.auth-title{font-weight:700;font-size:18px;margin-bottom:6px}.auth-sub{font-size:11px;color:var(--muted);margin-bottom:17px}.hidden{display:none!important}
+@media(min-width:600px){.page{max-width:620px;margin:0 auto}.top{padding-left:max(16px,calc((100% - 620px)/2));padding-right:max(16px,calc((100% - 620px)/2))}.nav{max-width:620px;margin:auto;left:50%;transform:translateX(-50%);border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+</style>
 </head>
 <body>
-<div class="app-shell">
-    <div id="authOverlay">
-        <div class="auth-card">
-            <div class="auth-logo">N</div>
-            <div class="eyebrow">ADMIN AUTHENTICATION</div>
-            <div class="auth-title">Nafsi Control Center</div>
-            <div class="field"><input type="password" id="masterPin" placeholder="Enter admin passcode" autocomplete="current-password"></div>
-            <button class="btn" onclick="unlockConsole()">Unlock console</button>
-            <div id="authErr" role="alert"></div>
-            <div class="sync-caption">Private administrator workspace</div>
-        </div>
-    </div>
+<div id="authOverlay"><div class="auth"><div class="card"><div class="auth-title">NAFSI ADMIN</div><div class="auth-sub">Admin access</div><input type="password" id="masterPin" placeholder="Admin password" style="text-align:center"><button class="btn" onclick="unlockConsole()">Login</button><div id="authErr" style="color:var(--red);font-size:11px;margin-top:10px"></div></div></div></div>
+<header class="top"><div><div class="brand">NAFSI ADMIN</div><div class="status" id="syncStatusText">Connected to Firebase</div></div><button class="sync" onclick="refreshAllData(true)">Sync</button></header>
 
-    <header class="app-bar">
-        <div class="brand">
-            <div class="brand-mark">N</div>
-            <div>
-                <div class="app-title">NAFSI COMMANDER</div>
-                <div class="app-sub" id="syncStatusText">CLOUD CONNECTION</div>
-            </div>
-        </div>
-        <button class="sync-btn" onclick="refreshAllData(true)" aria-label="Synchronize cloud data"><span>↻</span> Sync</button>
-    </header>
+<!-- SINGLE PASSWORD + PASSWORD MANAGEMENT -->
+<section id="tabSingle" class="page active">
+  <div class="heading">Single Password</div><div class="subheading">Create one license password and manage existing passwords below.</div>
+  <div class="card">
+    <div class="card-title">Create Password</div>
+    <div class="grid"><div class="field"><label>Device Slots</label><input type="number" id="singleMaxDevices" value="1" min="1" max="500"></div><div class="field"><label>Duration</label><select id="singlePreset"><option value="24">1 Day</option><option value="168">7 Days</option><option value="720">30 Days</option><option value="8760">1 Year</option><option value="custom">Custom</option></select></div></div>
+    <div id="singleCustomRow" class="grid hidden"><div><label>Time Value</label><input type="number" id="singleCustomVal" value="30" min="1"></div><div><label>Unit</label><select id="singleCustomUnit"><option value="minutes">Minutes</option><option value="hours">Hours</option><option value="days">Days</option></select></div></div>
+    <label>Owner / Reseller (optional)</label><input id="singleOwner" placeholder="Admin">
+    <button class="btn" onclick="generateSingleKey()">Generate Password</button>
+    <div id="singleResult" class="result hidden"></div><button id="singleCopy" class="btn secondary hidden" style="margin-top:8px" onclick="copyResult('singleResult')">Copy Password</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Password Management</div>
+    <input class="search" id="searchKeyInput" placeholder="Search password, owner or HWID..." oninput="renderKeysList()">
+    <div id="keysContainer"><div class="empty">No passwords loaded.</div></div>
+  </div>
+</section>
 
-    <main>
-        <section id="tabGenerate" class="page active">
-            <div class="page-heading">
-                <div class="eyebrow">PASSWORD OPERATIONS</div>
-                <h1 class="page-title" id="activePageTitle">Generate passwords</h1>
-                <p class="page-desc">Create one password or generate a batch of up to 100 passwords in one action.</p>
-            </div>
-            <div class="stats-row">
-                <div class="stat-pill"><div class="stat-lbl">TOTAL LICENSES</div><div class="stat-num" id="stTotalKeys">0</div></div>
-                <div class="stat-pill"><div class="stat-lbl">TRIAL DEVICES</div><div class="stat-num" id="stTotalTrials">0</div></div>
-            </div>
-            <div class="card">
-                <div class="card-head"><span>Bulk password generator</span><small>Single or 1–100 batch</small></div>
-                <div class="grid-2">
-                    <div class="field"><label for="genQty">PASSWORD QUANTITY (1 = SINGLE, 2–100 = BULK)</label><input type="number" id="genQty" value="1" min="1" max="100" inputmode="numeric"></div>
-                    <div class="field"><label for="genQuickQty">QUICK BATCH SIZE</label><select id="genQuickQty" onchange="setGenerateQuantity(this.value)"><option value="1">1 password</option><option value="10">10 passwords</option><option value="25">25 passwords</option><option value="50">50 passwords</option><option value="100">100 passwords</option></select></div>
-                </div>
-                <div class="field"><label for="genMaxDevices">DEVICE SLOTS PER PASSWORD</label><input type="number" id="genMaxDevices" value="1" min="1" max="500" inputmode="numeric"></div>
-                <div class="field"><label for="genPreset">LICENSE DURATION</label>
-                    <select id="genPreset" onchange="toggleCustomTime()">
-                        <option value="24">1 day</option><option value="168">7 days</option><option value="720">30 days</option><option value="8760">1 year</option><option value="custom">Custom duration</option>
-                    </select>
-                </div>
-                <div id="customTimeRow" class="grid-2 hidden">
-                    <div class="field"><label for="customTimeVal">TIME VALUE</label><input type="number" id="customTimeVal" value="30" min="1" inputmode="numeric"></div>
-                    <div class="field"><label for="customTimeUnit">TIME UNIT</label><select id="customTimeUnit"><option value="minutes">Minutes</option><option value="hours">Hours</option><option value="days">Days</option></select></div>
-                </div>
-                <div class="field"><label for="genOwner">OWNER / RESELLER NOTE</label><input type="text" id="genOwner" placeholder="Optional owner name"></div>
-                <button class="btn" id="generatePasswordsBtn" onclick="generateKeysBatch()">＋ Generate passwords</button>
-            </div>
-            <div id="generatedResultCard" class="card hidden">
-                <div class="card-head"><span>Generated passwords</span><button class="btn btn-sm btn-blue" onclick="copyGeneratedBatch()">Copy all</button></div>
-                <div id="generatedKeysBox" class="mono" style="font-size:12px;color:var(--accent-2);white-space:pre-wrap;overflow-wrap:anywhere;background:var(--input);padding:13px;border-radius:12px;border:1px solid var(--line);"></div>
-            </div>
-        </section>
+<!-- BULK PASSWORDS -->
+<section id="tabBulk" class="page">
+  <div class="heading">Bulk Passwords</div><div class="subheading">Generate multiple passwords together with the same expiry and device limit.</div>
+  <div class="card">
+    <div class="card-title">Bulk Generator</div>
+    <div class="grid"><div><label>Password Quantity (1–100)</label><input type="number" id="bulkQty" value="10" min="1" max="100"></div><div><label>Device Slots</label><input type="number" id="bulkMaxDevices" value="1" min="1" max="500"></div></div>
+    <label>Duration</label><select id="bulkPreset"><option value="24">1 Day</option><option value="168">7 Days</option><option value="720">30 Days</option><option value="8760">1 Year</option><option value="custom">Custom</option></select>
+    <div id="bulkCustomRow" class="grid hidden"><div><label>Time Value</label><input type="number" id="bulkCustomVal" value="30" min="1"></div><div><label>Unit</label><select id="bulkCustomUnit"><option value="minutes">Minutes</option><option value="hours">Hours</option><option value="days">Days</option></select></div></div>
+    <label>Owner / Reseller (optional)</label><input id="bulkOwner" placeholder="Admin">
+    <button class="btn" onclick="generateBulkKeys()">Generate Bulk Passwords</button>
+    <div id="bulkResult" class="result hidden"></div><button id="bulkCopy" class="btn secondary hidden" style="margin-top:8px" onclick="copyResult('bulkResult')">Copy All Passwords</button>
+  </div>
+</section>
 
-        <section id="tabKeys" class="page">
-            <div class="page-heading"><div class="eyebrow">PASSWORD & USER MANAGEMENT</div><h1 class="page-title">Password management</h1><p class="page-desc">Find any issued password, inspect its owner and devices, then block, unblock, expire, reset or delete it.</p></div>
-            <div class="stats-row">
-                <div class="stat-pill"><div class="stat-lbl">TOTAL PASSWORDS</div><div class="stat-num" id="passTotal">0</div></div>
-                <div class="stat-pill"><div class="stat-lbl">ACTIVE</div><div class="stat-num" id="passActive">0</div></div>
-                <div class="stat-pill"><div class="stat-lbl">BLOCKED</div><div class="stat-num" id="passBlocked">0</div></div>
-                <div class="stat-pill"><div class="stat-lbl">EXPIRED</div><div class="stat-num" id="passExpired">0</div></div>
-            </div>
-            <div class="card">
-                <div class="field"><label for="searchKeyInput">SEARCH PASSWORD / OWNER / DEVICE ID</label><input type="search" id="searchKeyInput" placeholder="Type password, owner or HWID…" style="margin:0" oninput="renderKeysList()"></div>
-                <div class="field" style="margin-top:12px"><label for="passwordFilter">FILTER PASSWORDS</label><select id="passwordFilter" onchange="renderKeysList()"><option value="all">All passwords</option><option value="active">Active only</option><option value="blocked">Blocked only</option><option value="expired">Expired only</option></select></div>
-                <div class="btn-row" style="margin-top:12px">
-                    <button class="btn btn-sm btn-outline" onclick="selectVisiblePasswords(true)">Select visible</button>
-                    <button class="btn btn-sm btn-outline" onclick="clearSelectedPasswords()">Clear selection</button>
-                    <button class="btn btn-sm btn-blue" id="copySelectedBtn" onclick="copySelectedPasswords()" disabled>Copy selected</button>
-                </div>
-                <div class="helper" id="selectedCount">0 passwords selected</div>
-                <div class="btn-row" style="margin-top:10px">
-                    <button class="btn btn-sm btn-warn" id="bulkBlockBtn" onclick="bulkManagePasswords('block')" disabled>Block selected</button>
-                    <button class="btn btn-sm btn-outline" id="bulkUnblockBtn" onclick="bulkManagePasswords('unblock')" disabled>Unblock selected</button>
-                    <button class="btn btn-sm btn-danger" id="bulkDeleteBtn" onclick="bulkManagePasswords('delete')" disabled>Delete selected</button>
-                </div>
-            </div>
-            <div id="keysContainer"></div>
-        </section>
+<!-- SETTINGS -->
+<section id="tabSettings" class="page">
+  <div class="heading">Settings</div><div class="subheading">Control what the client app displays. Save changes to apply them to the client.</div>
+  <div class="card">
+    <div class="card-title">Dialog Controls</div>
+    <div class="switch-row"><div class="switch-copy">Login Dialog<small>Turn client login access screen on or off. OFF blocks access; it does not bypass license checks.</small></div><input class="switch" type="checkbox" id="cfgLoginDialog" checked></div>
+    <div class="switch-row"><div class="switch-copy">Update Dialog<small>Show or hide the version update dialog.</small></div><input class="switch" type="checkbox" id="cfgUpdateDialog" checked></div>
+    <div class="switch-row"><div class="switch-copy">5-Minute Trial<small>Allow new devices to claim the free trial.</small></div><input class="switch" type="checkbox" id="cfgTrialEnabled" checked></div>
+    <div class="switch-row"><div class="switch-copy">Maintenance Mode<small>Temporarily stop client login and show the maintenance message.</small></div><input class="switch" type="checkbox" id="cfgMaintenance"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Update Dialog</div>
+    <div class="grid"><div><label>Version Code</label><input type="number" id="cfgVerCode" value="1" min="1"></div><div><label>Version Name</label><input id="cfgVerName" value="1.0" placeholder="1.0"></div></div>
+    <label>Update Message / Changelog</label><textarea id="cfgChangelog" placeholder="What's new in this update?"></textarea>
+    <label>APK Download Link</label><input id="cfgApkUrl" placeholder="https://...">
+  </div>
+  <div class="card">
+    <div class="card-title">Login & Client Message</div>
+    <label>Login Disabled Message</label><textarea id="cfgLoginDisabledMessage" placeholder="Login is temporarily disabled by Admin."></textarea>
+    <label>Maintenance Message</label><textarea id="cfgMaintenanceMessage" placeholder="Server is under maintenance."></textarea>
+    <label>Live Broadcast Message (optional)</label><textarea id="cfgBroadcast" placeholder="Announcement shown in client dialog"></textarea>
+  </div>
+  <div class="card">
+    <div class="card-title">Contact Button</div>
+    <div class="grid" style="margin-bottom:10px"><button class="btn secondary" onclick="setContactPreset('WHATSAPP','https://wa.me/91')">WhatsApp</button><button class="btn secondary" onclick="setContactPreset('TELEGRAM','https://t.me/')">Telegram</button></div>
+    <label>Button Text</label><input id="cfgBuyText" placeholder="WhatsApp / Telegram">
+    <label>Contact URL</label><input id="cfgBuyUrl" placeholder="https://...">
+  </div>
+  <button class="btn" onclick="saveRemoteConfig()">Save Settings</button>
+  <button class="btn secondary" style="margin-top:9px" onclick="forceGithubReload()">Reload Admin Panel</button>
+</section>
 
-        <section id="tabConfig" class="page">
-            <div class="page-heading"><div class="eyebrow">REMOTE CLIENT SETTINGS</div><h1 class="page-title">Client controls</h1><p class="page-desc">These settings are read by the Android login dialog from Firebase <span class="mono">/config</span>.</p></div>
+<!-- TRIAL / HWID -->
+<section id="tabTrial" class="page">
+  <div class="heading">Trial & HWID</div><div class="subheading">View claimed trials, reset a trial, and manage blocked devices.</div>
+  <div class="card">
+    <div class="card-title">Block Device (HWID)</div>
+    <label>Hardware ID</label><input id="blkHwidInput" placeholder="Paste HWID">
+    <button class="btn danger" onclick="blacklistHwid()">Block HWID</button>
+    <div id="blacklistContainer" style="margin-top:10px"></div>
+  </div>
+  <div class="card"><div class="card-title">Claimed 5-Minute Trials</div><div id="trialsContainer"><div class="empty">No trial records loaded.</div></div></div>
+</section>
 
-            <div class="card">
-                <div class="card-head"><span>Login dialog control</span><small>Remote access gate</small></div>
-                <div class="control-row">
-                    <div><div class="control-title">Client login dialog</div><div class="control-desc">ON shows the normal license login. OFF locks client access and shows a closed notice; it does not bypass license verification.</div></div>
-                    <select id="cfgLoginDialogEnabled" aria-label="Client login dialog"><option value="true">ON</option><option value="false">OFF</option></select>
-                </div>
-                <div class="field" style="margin-top:13px"><label for="cfgLoginDisabledMessage">LOGIN DISABLED MESSAGE</label><textarea id="cfgLoginDisabledMessage" placeholder="Client access is temporarily disabled by Admin."></textarea></div>
-                <button class="btn" onclick="saveRemoteConfig()">Save login dialog setting</button>
-            </div>
-
-            <div class="card">
-                <div class="card-head"><span>Access & availability</span><small>Live client behaviour</small></div>
-                <div class="control-row">
-                    <div><div class="control-title">5-minute free trial</div><div class="control-desc">Allow or disable new trial activations.</div></div>
-                    <select id="cfgTrialEnabled" aria-label="5-minute free trial"><option value="true">Enabled</option><option value="false">Disabled</option></select>
-                </div>
-                <div class="control-row">
-                    <div><div class="control-title">Maintenance mode</div><div class="control-desc">Replace the login form with a maintenance notice.</div></div>
-                    <select id="cfgMaintenance" aria-label="Maintenance mode"><option value="false">Offline</option><option value="true">Enabled</option></select>
-                </div>
-                <div class="field" style="margin-top:13px"><label for="cfgMaintenanceMessage">MAINTENANCE MESSAGE</label><textarea id="cfgMaintenanceMessage" placeholder="Explain why the service is unavailable…"></textarea><div class="helper">Shown in the client dialog while maintenance mode is enabled.</div></div>
-                <div class="field" style="margin-top:14px"><label for="cfgBroadcast">LIVE BROADCAST BANNER</label><textarea id="cfgBroadcast" placeholder="Leave empty to hide the client banner…"></textarea><div class="helper">A short message displayed above the login form. Empty text hides it.</div></div>
-                <button class="btn" onclick="saveRemoteConfig()">Save client settings</button>
-            </div>
-
-            <div class="card">
-                <div class="card-head"><span>Contact button</span><small>Client login dialog</small></div>
-                <div class="btn-row" style="margin-bottom:14px">
-                    <button class="btn btn-sm btn-outline" style="border-color:rgba(16,185,129,.45);color:var(--accent-2)" onclick="setContactPreset('WHATSAPP','https://wa.me/91')">WhatsApp preset</button>
-                    <button class="btn btn-sm btn-outline" style="border-color:rgba(56,189,248,.45);color:#7DD3FC" onclick="setContactPreset('TELEGRAM','https://t.me/')">Telegram preset</button>
-                </div>
-                <div class="field"><label for="cfgBuyText">BUTTON LABEL</label><input type="text" id="cfgBuyText" placeholder="e.g. Contact support"></div>
-                <div class="field"><label for="cfgBuyUrl">CONTACT / REDIRECT URL</label><input type="url" id="cfgBuyUrl" placeholder="https://wa.me/91XXXXXXXXXX"></div>
-                <div class="helper">The client detects WhatsApp / Telegram styling from the label or URL.</div>
-            </div>
-
-            <div class="card">
-                <div class="card-head"><span>Update dialog control</span><small>Client update notice</small></div>
-                <div class="grid-2">
-                    <div class="field"><label for="cfgVerCode">VERSION CODE</label><input type="number" id="cfgVerCode" value="1" min="1" inputmode="numeric"></div>
-                    <div class="field"><label for="cfgVerName">VERSION NAME</label><input type="text" id="cfgVerName" value="1.0" placeholder="e.g. 2.1"></div>
-                </div>
-                <div class="control-row">
-                    <div><div class="control-title">Update dialog</div><div class="control-desc">ON shows the update dialog. OFF returns the client to normal login.</div></div>
-                    <select id="cfgForceUpdate" aria-label="Update dialog"><option value="false">OFF</option><option value="true">ON</option></select>
-                </div>
-                <div class="field" style="margin-top:13px"><label for="cfgChangelog">UPDATE NOTES / CHANGELOG</label><textarea id="cfgChangelog" placeholder="What changed in this release?" ></textarea></div>
-                <div class="field"><label for="cfgApkUrl">APK DOWNLOAD URL</label><input type="url" id="cfgApkUrl" placeholder="https://example.com/app.apk"></div>
-                <div class="helper">To show the update dialog, set Version Code above 1, enable the switch and provide an APK URL. Maintenance mode takes priority.</div>
-                <button class="btn" style="margin-top:14px" onclick="saveRemoteConfig()">Save update settings</button>
-            </div>
-
-            <div class="card">
-                <div class="card-head"><span>Client dialog preview</span><small>Local preview</small></div>
-                <div class="client-preview">
-                    <div class="preview-head"><span>NAFSI CLIENT ACCESS</span><span>●</span></div>
-                    <div class="preview-state" id="previewMode">Normal access</div>
-                    <div class="preview-sub" id="previewTrial">5-minute trial enabled</div>
-                    <div id="previewBroadcast" class="preview-banner muted">No broadcast message</div>
-                </div>
-                <div class="helper">Preview only. The actual dialog updates after it fetches the saved Firebase configuration.</div>
-            </div>
-
-            <div class="card">
-                <div class="card-head"><span>Admin panel update</span><small>WebView reload</small></div>
-                <p class="card-note">Reload the hosted panel after publishing a new index.html build.</p>
-                <button class="btn btn-outline" onclick="forceGithubReload()">↻ Pull latest panel</button>
-            </div>
-        </section>
-
-        <section id="tabHwid" class="page">
-            <div class="page-heading"><div class="eyebrow">DEVICE GOVERNANCE</div><h1 class="page-title">HWID guard</h1><p class="page-desc">Review trial devices and manage the global hardware-ID block list.</p></div>
-            <div class="card">
-                <div class="card-head"><span>Global HWID blacklist</span></div>
-                <div class="field"><label for="blkHwidInput">HARDWARE SIGNATURE</label><input type="text" id="blkHwidInput" class="mono" placeholder="NF-XXXX-XXXX" style="text-transform:uppercase"></div>
-                <button class="btn btn-danger" onclick="blacklistHwid()">Block device</button>
-                <div id="blacklistContainer" style="margin-top:13px"></div>
-            </div>
-            <div class="card">
-                <div class="card-head"><span>Claimed 5-minute trials</span></div>
-                <div id="trialsContainer"></div>
-            </div>
-        </section>
-    </main>
-
-    <nav class="bottom-nav" aria-label="Main navigation">
-        <div class="nav-item active" onclick="switchTab('tabGenerate', this)"><span class="nav-icon">＋</span><span class="nav-label">GENERATE</span></div>
-        <div class="nav-item" onclick="switchTab('tabKeys', this)"><span class="nav-icon">▤</span><span class="nav-label">PASSWORDS</span></div>
-        <div class="nav-item" onclick="switchTab('tabConfig', this)"><span class="nav-icon">⚙</span><span class="nav-label">CLIENT</span></div>
-        <div class="nav-item" onclick="switchTab('tabHwid', this)"><span class="nav-icon">⌁</span><span class="nav-label">DEVICES</span></div>
-    </nav>
+<div id="confirmOverlay" class="confirm-overlay hidden" role="dialog" aria-modal="true">
+ <div class="confirm-box"><div id="confirmMessage" class="confirm-message">Are you sure?</div><div class="confirm-actions"><button class="btn secondary" onclick="resolveConfirm(false)">Cancel</button><button class="btn danger" onclick="resolveConfirm(true)">Continue</button></div></div>
 </div>
+
+<nav class="nav">
+ <button class="active" onclick="switchTab('tabSingle',this)">Single</button>
+ <button onclick="switchTab('tabBulk',this)">Bulk</button>
+ <button onclick="switchTab('tabSettings',this)">Settings</button>
+ <button onclick="switchTab('tabTrial',this)">Trial</button>
+</nav>
 <script>
 
-    const DB_URL = "https://nafsi-panel-web-app-default-rtdb.firebaseio.com";
-    const MASTER_PIN = "NafisAdmin99";
-    let cachedKeys = {};
-    let lastGeneratedBatch = "";
-    const selectedPasswordKeys = new Set();
+const DB_URL = "https://nafsi-panel-web-app-default-rtdb.firebaseio.com";
+const MASTER_PIN = "NafisAdmin99";
+let cachedKeys = {};
+let lastGeneratedBatch = "";
+let currentTrials = {};
+let currentBlacklist = {};
+let pendingConfirm = null;
+function askConfirm(message){
+  return new Promise(resolve=>{
+    pendingConfirm=resolve;
+    document.getElementById('confirmMessage').textContent=message;
+    document.getElementById('confirmOverlay').classList.remove('hidden');
+  });
+}
+function resolveConfirm(accepted){
+  document.getElementById('confirmOverlay').classList.add('hidden');
+  if(pendingConfirm){const done=pendingConfirm;pendingConfirm=null;done(accepted);}
+}
 
-    function tap() {
-        if (window.NativeAdmin && window.NativeAdmin.hapticTap) {
-            window.NativeAdmin.hapticTap();
-        }
+function tap(){ if(window.NativeAdmin && window.NativeAdmin.hapticTap) window.NativeAdmin.hapticTap(); }
+function toast(msg){
+  if(window.NativeAdmin && window.NativeAdmin.showNativeToast) window.NativeAdmin.showNativeToast(msg);
+  else { const s=document.getElementById('syncStatusText'); if(s) s.textContent=msg; }
+}
+function copyText(txt,label='Copied'){
+  tap();
+  if(window.NativeAdmin && window.NativeAdmin.copyToClipboard) window.NativeAdmin.copyToClipboard(txt,label);
+  else if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(()=>toast(label)).catch(()=>toast('Copy failed'));
+  else toast('Clipboard unavailable');
+}
+function copyResult(id){ const el=document.getElementById(id); if(el) copyText(el.textContent, 'Password(s) copied'); }
+window.addEventListener('DOMContentLoaded',()=>{
+  ['single','bulk'].forEach(p=>{
+    document.getElementById(p+'Preset').addEventListener('change',()=>document.getElementById(p+'CustomRow').classList.toggle('hidden',document.getElementById(p+'Preset').value!=='custom'));
+  });
+  if(localStorage.getItem('nafsi_admin_unlocked')==='true'){
+    document.getElementById('authOverlay').classList.add('hidden'); refreshAllData(false);
+  }
+});
+function unlockConsole(){
+  tap(); const pin=document.getElementById('masterPin').value.trim();
+  if(pin===MASTER_PIN){ localStorage.setItem('nafsi_admin_unlocked','true');document.getElementById('authOverlay').classList.add('hidden');refreshAllData(true); }
+  else document.getElementById('authErr').textContent='Incorrect password';
+}
+function switchTab(id,el){
+  tap(); document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');el.classList.add('active');
+}
+function generateRandomKey(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  while(true){let s='',sum=0;for(let i=0;i<8;i++){const c=chars.charAt(Math.floor(Math.random()*chars.length));s+=c;sum+=c.charCodeAt(0);}if(sum%7===0)return 'VIP-'+s;}
+}
+function readDuration(prefix){
+  const preset=document.getElementById(prefix+'Preset').value;
+  if(preset!=='custom'){const h=parseInt(preset,10);return {durationHours:h,durationMs:h*3600000,label:h%24===0?(h/24)+' Days':h+' Hours'};}
+  const val=Math.max(1,parseInt(document.getElementById(prefix+'CustomVal').value,10)||1);
+  const unit=document.getElementById(prefix+'CustomUnit').value;
+  if(unit==='minutes')return {durationHours:Math.max(1,Math.ceil(val/60)),durationMs:val*60000,label:val+' Min'};
+  if(unit==='hours')return {durationHours:val,durationMs:val*3600000,label:val+' Hours'};
+  return {durationHours:val*24,durationMs:val*86400000,label:val+' Days'};
+}
+async function uploadKeys(qty,prefix,resultId,copyId){
+  const slots=Math.max(1,Math.min(500,parseInt(document.getElementById(prefix+'MaxDevices').value,10)||1));
+  const owner=document.getElementById(prefix+'Owner').value.trim()||'Admin';
+  const duration=readDuration(prefix);const now=Date.now();const keys=[];
+  const result=document.getElementById(resultId),copy=document.getElementById(copyId);
+  const button=document.querySelector(`#${resultId}`).previousElementSibling;
+  if(button){button.disabled=true;button.textContent='Generating...';}
+  try{
+    for(let i=0;i<qty;i++){
+      const key=generateRandomKey();
+      const payload={key,owner,maxDevices:slots,usedDevices:0,durationHours:duration.durationHours,durationLabel:duration.label,expiryTime:now+duration.durationMs,blocked:false,createdAt:now};
+      const res=await fetch(`${DB_URL}/keys/${key}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      if(!res.ok)throw new Error('Firebase rejected password upload');
+      keys.push(key);
     }
-
-    function toast(msg) {
-        if (window.NativeAdmin && window.NativeAdmin.showNativeToast) {
-            window.NativeAdmin.showNativeToast(msg);
-        } else {
-            document.getElementById("syncStatusText").innerText = msg.toUpperCase();
-        }
-    }
-
-    function copyText(txt, label = "Copied to clipboard") {
-        tap();
-        if (window.NativeAdmin && window.NativeAdmin.copyToClipboard) {
-            window.NativeAdmin.copyToClipboard(txt, label);
-        } else {
-            navigator.clipboard.writeText(txt);
-            toast(label);
-        }
-    }
-
-    // Auto-unlock if saved in native storage
-    window.addEventListener("DOMContentLoaded", () => {
-        if (localStorage.getItem("nafsi_admin_unlocked") === "true") {
-            document.getElementById("authOverlay").classList.add("hidden");
-            refreshAllData(false);
-        }
-        ["cfgLoginDialogEnabled", "cfgLoginDisabledMessage", "cfgBroadcast", "cfgTrialEnabled", "cfgMaintenance", "cfgMaintenanceMessage", "cfgForceUpdate", "cfgVerCode", "cfgChangelog"].forEach(id => {
-            document.getElementById(id)?.addEventListener("input", updateClientPreview);
-            document.getElementById(id)?.addEventListener("change", updateClientPreview);
-        });
-        updateClientPreview();
-    });
-
-    function unlockConsole() {
-        tap();
-        const pin = document.getElementById("masterPin").value.trim();
-        if (pin === MASTER_PIN) {
-            localStorage.setItem("nafsi_admin_unlocked", "true");
-            document.getElementById("authOverlay").classList.add("hidden");
-            refreshAllData(true);
-        } else {
-            document.getElementById("authErr").innerText = "Invalid Master Key";
-        }
-    }
-
-    function switchTab(tabId, el) {
-        tap();
-        document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-        document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-        document.getElementById(tabId).classList.add("active");
-        el.classList.add("active");
-        const label = el.querySelector(".nav-label");
-        const title = document.getElementById("activePageTitle");
-        if (label && title) title.textContent = label.textContent.trim();
-    }
-
-    function setGenerateQuantity(value) {
-        const qty = Math.min(100, Math.max(1, parseInt(value, 10) || 1));
-        document.getElementById("genQty").value = qty;
-    }
-
-    function toggleCustomTime() {
-        const v = document.getElementById("genPreset").value;
-        document.getElementById("customTimeRow").classList.toggle("hidden", v !== "custom");
-    }
-
-    function generateRandomKey(usedKeys = new Set()) {
-        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        for (let attempt = 0; attempt < 100; attempt++) {
-            const bytes = new Uint8Array(8);
-            if (window.crypto && window.crypto.getRandomValues) {
-                window.crypto.getRandomValues(bytes);
-            } else {
-                for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
-            }
-            let value = "VIP-";
-            for (let i = 0; i < bytes.length; i++) value += chars[bytes[i] % chars.length];
-            if (!usedKeys.has(value)) return value;
-        }
-        throw new Error("Could not create a unique password. Try again.");
-    }
-
-    // 1. BATCH GENERATE KEYS (1 TO 100 KEYS + 1 TO 50+ DEVICE SLOTS + CUSTOM TIME)
-    async function generateKeysBatch() {
-        tap();
-        const qtyRaw = parseInt(document.getElementById("genQty").value, 10);
-        const qty = Math.min(100, Math.max(1, Number.isFinite(qtyRaw) ? qtyRaw : 1));
-        const maxDevices = Math.min(500, Math.max(1, parseInt(document.getElementById("genMaxDevices").value, 10) || 1));
-        const owner = document.getElementById("genOwner").value.trim() || "Admin";
-        const preset = document.getElementById("genPreset").value;
-
-        let durationHours = 24;
-        let durationMs = 24 * 60 * 60 * 1000;
-        let label = "1 Day";
-        if (preset !== "custom") {
-            durationHours = Math.max(1, parseInt(preset, 10) || 24);
-            durationMs = durationHours * 60 * 60 * 1000;
-            label = durationHours % 24 === 0 ? (durationHours / 24) + (durationHours === 24 ? " Day" : " Days") : durationHours + " Hours";
-        } else {
-            const val = Math.max(1, parseInt(document.getElementById("customTimeVal").value, 10) || 1);
-            const unit = document.getElementById("customTimeUnit").value;
-            if (unit === "minutes") {
-                durationMs = val * 60 * 1000;
-                durationHours = Math.max(1, Math.ceil(val / 60));
-                label = val + " Min";
-            } else if (unit === "hours") {
-                durationMs = val * 60 * 60 * 1000;
-                durationHours = val;
-                label = val + " Hours";
-            } else {
-                durationMs = val * 24 * 60 * 60 * 1000;
-                durationHours = val * 24;
-                label = val + " Days";
-            }
-        }
-
-        const generateButton = document.getElementById("generatePasswordsBtn");
-        generateButton.disabled = true;
-        generateButton.textContent = "Generating…";
-        try {
-            toast("Generating " + qty + " password(s)…");
-            const now = Date.now();
-            const usedKeys = new Set(Object.keys(cachedKeys || {}));
-            const payloadMap = {};
-            const newKeys = [];
-
-            for (let i = 0; i < qty; i++) {
-                const key = generateRandomKey(usedKeys);
-                usedKeys.add(key);
-                newKeys.push(key);
-                payloadMap[key] = {
-                    key,
-                    owner,
-                    maxDevices,
-                    usedDevices: 0,
-                    durationHours,
-                    durationLabel: label,
-                    expiryTime: now + durationMs,
-                    blocked: false,
-                    status: "ACTIVE",
-                    createdAt: now
-                };
-            }
-
-            const response = await fetch(`${DB_URL}/keys.json`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payloadMap)
-            });
-            if (!response.ok) throw new Error(`Firebase returned HTTP ${response.status}`);
-
-            lastGeneratedBatch = newKeys.join("\n");
-            document.getElementById("generatedResultCard").classList.remove("hidden");
-            document.getElementById("generatedKeysBox").innerText = lastGeneratedBatch;
-            toast(qty + (qty === 1 ? " password generated" : " passwords generated") + " • " + maxDevices + " device slot(s) each");
-            await refreshAllData(false);
-        } catch (error) {
-            console.error(error);
-            toast("Password generation failed: " + (error.message || "check Firebase rules"));
-        } finally {
-            generateButton.disabled = false;
-            generateButton.textContent = "＋ Generate passwords";
-        }
-    }
-
-    function copyGeneratedBatch() {
-        if (lastGeneratedBatch) copyText(lastGeneratedBatch, "All generated keys copied!");
-    }
-
-    // 2. LOAD & MANAGE ALL KEYS, CONFIG & HWIDS
-    async function refreshAllData(showToast) {
-        if (showToast) tap();
-        try {
-            const [kRes, tRes, cRes, bRes] = await Promise.all([
-                fetch(`${DB_URL}/keys.json`),
-                fetch(`${DB_URL}/trials.json`),
-                fetch(`${DB_URL}/config.json`),
-                fetch(`${DB_URL}/blacklist.json`)
-            ]);
-
-            if (!kRes.ok || !tRes.ok || !cRes.ok || !bRes.ok) throw new Error("Firebase read failed");
-            cachedKeys = await kRes.json() || {};
-            const trials = await tRes.json() || {};
-            const config = await cRes.json() || {};
-            const blacklist = await bRes.json() || {};
-
-            document.getElementById("stTotalKeys").innerText = Object.keys(cachedKeys).length;
-            document.getElementById("stTotalTrials").innerText = Object.keys(trials).length;
-
-            renderKeysList();
-            renderConfigForm(config);
-            renderHwidLists(trials, blacklist);
-            if (showToast) toast("Cloud data synchronized");
-        } catch (e) {
-            toast("Sync error: Check connection");
-        }
-    }
-
-    function escapeHtml(value) {
-        return String(value == null ? "" : value).replace(/[&<>"']/g, ch => ({
-            "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
-        }[ch]));
-    }
-
-    function keyPath(key) {
-        return `${DB_URL}/keys/${encodeURIComponent(String(key))}.json`;
-    }
-
-    function passwordStatus(record, now = Date.now()) {
-        if (record.blocked === true || String(record.status || "").toUpperCase() === "BLOCKED") return "blocked";
-        if (Number(record.expiryTime || 0) > 0 && now >= Number(record.expiryTime)) return "expired";
-        return "active";
-    }
-
-    function updatePasswordStats(entries) {
-        const now = Date.now();
-        let active = 0, blocked = 0, expired = 0;
-        entries.forEach(([, record]) => {
-            const status = passwordStatus(record, now);
-            if (status === "blocked") blocked++;
-            else if (status === "expired") expired++;
-            else active++;
-        });
-        document.getElementById("passTotal").textContent = entries.length;
-        document.getElementById("passActive").textContent = active;
-        document.getElementById("passBlocked").textContent = blocked;
-        document.getElementById("passExpired").textContent = expired;
-    }
-
-    function updateBulkPasswordToolbar() {
-        const count = selectedPasswordKeys.size;
-        const countNode = document.getElementById("selectedCount");
-        if (countNode) countNode.textContent = `${count} password(s) selected`;
-        ["copySelectedBtn", "bulkBlockBtn", "bulkUnblockBtn", "bulkDeleteBtn"].forEach(id => {
-            const node = document.getElementById(id);
-            if (node) node.disabled = count === 0;
-        });
-    }
-
-    function renderKeysList() {
-        const box = document.getElementById("keysContainer");
-        const q = (document.getElementById("searchKeyInput").value || "").trim().toLowerCase();
-        const filter = document.getElementById("passwordFilter").value || "all";
-        box.innerHTML = "";
-
-        const entries = Object.entries(cachedKeys || {}).map(([dbKey, value]) => {
-            const record = value || {};
-            return [record.key || dbKey, { ...record, key: record.key || dbKey }];
-        }).sort((a, b) => (Number(b[1].createdAt) || 0) - (Number(a[1].createdAt) || 0));
-        updatePasswordStats(entries);
-        const known = new Set(entries.map(([key]) => key));
-        for (const selected of Array.from(selectedPasswordKeys)) if (!known.has(selected)) selectedPasswordKeys.delete(selected);
-
-        const now = Date.now();
-        const visible = entries.filter(([key, record]) => {
-            const devObj = record.devices || {};
-            const hwids = Object.keys(devObj);
-            if (record.hwid && !devObj[record.hwid]) hwids.push(record.hwid);
-            const searchTarget = `${key} ${record.owner || ""} ${hwids.join(" ")}`.toLowerCase();
-            if (q && !searchTarget.includes(q)) return false;
-            return filter === "all" || passwordStatus(record, now) === filter;
-        });
-
-        if (visible.length === 0) {
-            box.innerHTML = `<div class="card empty-state">${entries.length ? "No passwords match this search or filter." : "No passwords found. Generate passwords from the Generate tab."}</div>`;
-            updateBulkPasswordToolbar();
-            return;
-        }
-
-        visible.forEach(([key, record]) => {
-            const devObj = record.devices || {};
-            const hwidList = Object.keys(devObj);
-            if (record.hwid && !devObj[record.hwid]) hwidList.push(record.hwid);
-            const maxSlots = Math.max(1, Number(record.maxDevices) || 1);
-            const usedSlots = hwidList.length || Number(record.usedDevices) || 0;
-            const status = passwordStatus(record, now);
-            const statusLabel = status === "blocked" ? "BLOCKED" : status === "expired" ? "EXPIRED" : `ACTIVE • ${usedSlots}/${maxSlots} DEVICES`;
-            const badgeClass = status === "blocked" ? "b-block" : status === "expired" ? "b-exp" : "b-active";
-            const expiry = Number(record.expiryTime) || 0;
-            const remaining = expiry > now ? formatRemaining(expiry - now) : (expiry ? "Expired" : "No expiry recorded");
-            const keyArg = escapeHtml(JSON.stringify(key));
-            const owner = escapeHtml(record.owner || "Admin");
-            const safeHwids = escapeHtml(hwidList.join(", ") || "No device bound yet");
-            const created = Number(record.createdAt) ? new Date(Number(record.createdAt)).toLocaleString() : "Unknown";
-            box.innerHTML += `
-                <article class="key-card">
-                    <div class="key-top">
-                        <div class="password-card-title">
-                            <input class="password-select" type="checkbox" aria-label="Select password ${escapeHtml(key)}" ${selectedPasswordKeys.has(key) ? "checked" : ""} onchange='togglePasswordSelection(${keyArg}, this.checked)'>
-                            <span class="key-code" onclick='copyText(${keyArg}, "Password copied")'>${escapeHtml(key)}</span>
-                        </div>
-                        <span class="badge ${badgeClass}">${statusLabel}</span>
-                    </div>
-                    <div class="key-meta">
-                        Owner: ${owner}<br>
-                        Expiry: ${escapeHtml(remaining)}<br>
-                        Devices (${usedSlots}/${maxSlots}): ${safeHwids}<br>
-                        Created: ${escapeHtml(created)}
-                    </div>
-                    <div class="action-bar">
-                        <button class="btn btn-sm btn-blue" onclick='copyText(${keyArg}, "Password copied")'>Copy</button>
-                        <button class="btn btn-sm ${status === "blocked" ? "btn-outline" : "btn-warn"}" onclick='toggleBlockKey(${keyArg}, ${status !== "blocked"})'>${status === "blocked" ? "Unblock" : "Block user"}</button>
-                        <button class="btn btn-sm btn-warn" onclick='expireKeyNow(${keyArg})'>Expire now</button>
-                        <button class="btn btn-sm btn-outline" onclick='resetKeySlots(${keyArg})'>Reset devices</button>
-                        <button class="btn btn-sm btn-danger" onclick='deleteKey(${keyArg})'>Delete</button>
-                    </div>
-                </article>`;
-        });
-        updateBulkPasswordToolbar();
-    }
-
-    function formatRemaining(ms) {
-        const mins = Math.max(0, Math.floor(ms / 60000));
-        if (mins >= 1440) return `${Math.floor(mins / 1440)}d ${Math.floor((mins % 1440) / 60)}h left`;
-        if (mins >= 60) return `${Math.floor(mins / 60)}h ${mins % 60}m left`;
-        return `${mins}m left`;
-    }
-
-    function togglePasswordSelection(key, checked) {
-        if (checked) selectedPasswordKeys.add(key);
-        else selectedPasswordKeys.delete(key);
-        updateBulkPasswordToolbar();
-    }
-
-    function selectVisiblePasswords(checked) {
-        document.querySelectorAll("#keysContainer .password-select").forEach(node => {
-            node.checked = checked;
-            const cardKey = node.nextElementSibling ? node.nextElementSibling.textContent.trim() : "";
-            if (cardKey) togglePasswordSelection(cardKey, checked);
-        });
-        updateBulkPasswordToolbar();
-    }
-
-    function clearSelectedPasswords() {
-        selectedPasswordKeys.clear();
-        renderKeysList();
-    }
-
-    function copySelectedPasswords() {
-        const selected = Array.from(selectedPasswordKeys);
-        if (!selected.length) return;
-        copyText(selected.join("\n"), `${selected.length} passwords copied`);
-    }
-
-    async function bulkManagePasswords(action) {
-        const keys = Array.from(selectedPasswordKeys);
-        if (!keys.length) return toast("Select at least one password");
-        if (action === "delete" && !confirm(`Permanently delete ${keys.length} selected password(s)?`)) return;
-        if (action === "block" && !confirm(`Block ${keys.length} selected password(s)?`)) return;
-        if (action === "unblock" && !confirm(`Unblock ${keys.length} selected password(s)?`)) return;
-        const btn = document.getElementById(action === "delete" ? "bulkDeleteBtn" : action === "block" ? "bulkBlockBtn" : "bulkUnblockBtn");
-        if (btn) btn.disabled = true;
-        try {
-            const updates = {};
-            keys.forEach(key => {
-                if (action === "delete") updates[key] = null;
-                else {
-                    const value = action === "block";
-                    updates[`${key}/blocked`] = value;
-                    updates[`${key}/status`] = value ? "BLOCKED" : "ACTIVE";
-                }
-            });
-            const response = await fetch(`${DB_URL}/keys.json`, {
-                method: "PATCH", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updates)
-            });
-            if (!response.ok) throw new Error(`Firebase returned HTTP ${response.status}`);
-            selectedPasswordKeys.clear();
-            toast(`${keys.length} password(s) ${action === "delete" ? "deleted" : action === "block" ? "blocked" : "unblocked"}`);
-            await refreshAllData(false);
-        } catch (error) {
-            toast("Bulk action failed: " + (error.message || "check Firebase rules"));
-        } finally {
-            updateBulkPasswordToolbar();
-        }
-    }
-
-    async function toggleBlockKey(key, blockState) {
-        tap();
-        try {
-            const response = await fetch(`${DB_URL}/keys/${encodeURIComponent(key)}.json`, {
-                method: "PATCH", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ blocked: blockState, status: blockState ? "BLOCKED" : "ACTIVE" })
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            toast(blockState ? "Password blocked" : "Password unblocked");
-            await refreshAllData(false);
-        } catch (error) { toast("Block action failed: " + error.message); }
-    }
-
-    async function expireKeyNow(key) {
-        tap();
-        if (!confirm(`Expire password ${key} immediately?`)) return;
-        try {
-            const response = await fetch(`${DB_URL}/keys/${encodeURIComponent(key)}/expiryTime.json`, {
-                method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Date.now() - 5000)
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            toast("Password expired immediately");
-            await refreshAllData(false);
-        } catch (error) { toast("Expire action failed: " + error.message); }
-    }
-
-    async function resetKeySlots(key) {
-        tap();
-        if (!confirm(`Remove all device bindings for ${key}?`)) return;
-        try {
-            const response = await fetch(`${DB_URL}/keys/${encodeURIComponent(key)}.json`, {
-                method: "PATCH", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ devices: null, hwid: null, usedDevices: 0 })
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            toast("Device bindings reset");
-            await refreshAllData(false);
-        } catch (error) { toast("Reset failed: " + error.message); }
-    }
-
-    async function deleteKey(key) {
-        tap();
-        if (!confirm(`Permanently delete password ${key}?`)) return;
-        try {
-            const response = await fetch(keyPath(key), { method: "DELETE" });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            selectedPasswordKeys.delete(key);
-            toast("Password deleted");
-            await refreshAllData(false);
-        } catch (error) { toast("Delete failed: " + error.message); }
-    }
-
-    // 3. REMOTE CLIENT CONFIG (WHATSAPP / TELEGRAM SWITCHER)
-    function setContactPreset(label, urlPrefix) {
-        tap();
-        document.getElementById("cfgBuyText").value = label;
-        const cur = document.getElementById("cfgBuyUrl").value;
-        if (!cur.startsWith(urlPrefix)) {
-            document.getElementById("cfgBuyUrl").value = urlPrefix;
-        }
-    }
-
-    function renderConfigForm(cfg) {
-        document.getElementById("cfgLoginDialogEnabled").value = String(cfg.loginDialogEnabled !== false);
-        document.getElementById("cfgLoginDisabledMessage").value = cfg.loginDisabledMessage || "Client access is temporarily disabled by Admin.";
-        document.getElementById("cfgBuyText").value = cfg.buyButtonText || "";
-        document.getElementById("cfgBuyUrl").value = cfg.buyUrl || "";
-        document.getElementById("cfgBroadcast").value = cfg.broadcastMessage || "";
-        document.getElementById("cfgTrialEnabled").value = String(cfg.trialEnabled !== false);
-        document.getElementById("cfgMaintenance").value = String(cfg.maintenance === true);
-        document.getElementById("cfgMaintenanceMessage").value = cfg.maintenanceMessage || "Server is currently undergoing scheduled maintenance by Admin.";
-        document.getElementById("cfgVerCode").value = cfg.versionCode || 1;
-        document.getElementById("cfgVerName").value = cfg.versionName || "1.0";
-        document.getElementById("cfgForceUpdate").value = String(cfg.forceUpdate !== undefined ? cfg.forceUpdate === true : Number(cfg.versionCode || 1) > 1);
-        document.getElementById("cfgChangelog").value = cfg.changelog || "";
-        document.getElementById("cfgApkUrl").value = cfg.apkUrl || "";
-        updateClientPreview();
-    }
-
-    async function saveRemoteConfig() {
-        tap();
-        const buyUrl = document.getElementById("cfgBuyUrl").value.trim();
-        const apkUrl = document.getElementById("cfgApkUrl").value.trim();
-        const versionCode = Math.max(1, parseInt(document.getElementById("cfgVerCode").value, 10) || 1);
-
-        const isHttpUrl = (value) => {
-            if (!value) return true;
-            try {
-                const u = new URL(value);
-                return u.protocol === "https:" || u.protocol === "http:";
-            } catch (_) { return false; }
-        };
-        if (!isHttpUrl(buyUrl) || !isHttpUrl(apkUrl)) {
-            toast("Enter a valid http/https link");
-            return;
-        }
-        if (document.getElementById("cfgForceUpdate").value === "true" && versionCode <= 1) {
-            toast("Set Version Code above 1 to activate forced update");
-            return;
-        }
-
-        if (document.getElementById("cfgForceUpdate").value === "true" && !apkUrl) {
-            toast("Add an APK URL before turning the update dialog ON");
-            return;
-        }
-
-        const cfgPayload = {
-            loginDialogEnabled: document.getElementById("cfgLoginDialogEnabled").value === "true",
-            loginDisabledMessage: document.getElementById("cfgLoginDisabledMessage").value.trim() || "Client access is temporarily disabled by Admin.",
-            buyButtonText: document.getElementById("cfgBuyText").value.trim(),
-            buyUrl,
-            broadcastMessage: document.getElementById("cfgBroadcast").value.trim(),
-            trialEnabled: document.getElementById("cfgTrialEnabled").value === "true",
-            maintenance: document.getElementById("cfgMaintenance").value === "true",
-            maintenanceMessage: document.getElementById("cfgMaintenanceMessage").value.trim() || "Server is currently undergoing scheduled maintenance by Admin.",
-            versionCode,
-            versionName: document.getElementById("cfgVerName").value.trim() || "1.0",
-            forceUpdate: document.getElementById("cfgForceUpdate").value === "true",
-            changelog: document.getElementById("cfgChangelog").value.trim(),
-            apkUrl
-        };
-
-        try {
-            const response = await fetch(`${DB_URL}/config.json`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(cfgPayload)
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            updateClientPreview();
-            toast("Client settings saved to cloud");
-        } catch (error) {
-            toast("Save failed: check Firebase access");
-        }
-    }
-
-    function updateClientPreview() {
-        const loginEnabled = document.getElementById("cfgLoginDialogEnabled")?.value !== "false";
-        const broadcast = document.getElementById("cfgBroadcast")?.value.trim();
-        const trial = document.getElementById("cfgTrialEnabled")?.value === "true";
-        const maintenance = document.getElementById("cfgMaintenance")?.value === "true";
-        const forceUpdate = document.getElementById("cfgForceUpdate")?.value === "true";
-        const banner = document.getElementById("previewBroadcast");
-        const mode = document.getElementById("previewMode");
-        const trialState = document.getElementById("previewTrial");
-        if (banner) {
-            banner.textContent = broadcast || "No broadcast message";
-            banner.classList.toggle("muted", !broadcast);
-        }
-        if (mode) mode.textContent = !loginEnabled ? "Login dialog OFF • client access locked" : (maintenance ? "Maintenance" : (forceUpdate ? "Update dialog ON" : "Normal access"));
-        if (trialState) trialState.textContent = trial ? "5-minute trial enabled" : "5-minute trial disabled";
-    }
-
-    // 4. HWID GUARD & TRIAL MANAGEMENT
-    function renderHwidLists(trials, blacklist) {
-        const blkBox = document.getElementById("blacklistContainer");
-        blkBox.innerHTML = "";
-        Object.keys(blacklist).forEach(hwid => {
-            if (blacklist[hwid]) {
-                blkBox.innerHTML += `
-                    <div class="key-card" style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px;">
-                        <span class="key-code" style="color:var(--danger); font-size:12.5px;">${hwid}</span>
-                        <button class="btn btn-sm btn-outline" onclick="unbanHwid('${hwid}')">UNBAN</button>
-                    </div>`;
-            }
-        });
-
-        const trBox = document.getElementById("trialsContainer");
-        trBox.innerHTML = "";
-        Object.values(trials).forEach(t => {
-            const isExp = Date.now() > t.expiry;
-            trBox.innerHTML += `
-                <div class="key-card" style="padding:12px;">
-                    <div class="key-top">
-                        <span class="key-code" style="font-size:13px;">${t.hwid}</span>
-                        <span class="badge ${isExp ? 'b-block' : 'b-active'}">${isExp ? 'TRIAL EXHAUSTED' : 'ACTIVE TRIAL'}</span>
-                    </div>
-                    <div class="action-bar" style="margin-top:8px;">
-                        <button class="btn btn-sm btn-outline" onclick="resetTrialHwid('${t.hwid}')">ALLOW RE-TRIAL</button>
-                        <button class="btn btn-sm btn-danger" onclick="banTrialHwid('${t.hwid}')">BAN DEVICE</button>
-                    </div>
-                </div>`;
-        });
-    }
-
-    async function blacklistHwid() {
-        tap();
-        const hwid = document.getElementById("blkHwidInput").value.trim().toUpperCase();
-        if (!hwid) return;
-        await fetch(`${DB_URL}/blacklist/${hwid}.json`, { method: "PUT", body: "true" });
-        document.getElementById("blkHwidInput").value = "";
-        toast("Banned HWID: " + hwid);
-        refreshAllData(false);
-    }
-
-    async function unbanHwid(hwid) {
-        tap();
-        await fetch(`${DB_URL}/blacklist/${hwid}.json`, { method: "DELETE" });
-        toast("Unbanned " + hwid);
-        refreshAllData(false);
-    }
-
-    async function resetTrialHwid(hwid) {
-        tap();
-        await fetch(`${DB_URL}/trials/${hwid}.json`, { method: "DELETE" });
-        toast("Trial reset for " + hwid);
-        refreshAllData(false);
-    }
-
-    async function banTrialHwid(hwid) {
-        tap();
-        await fetch(`${DB_URL}/blacklist/${hwid}.json`, { method: "PUT", body: "true" });
-        toast("Device permanently banned!");
-        refreshAllData(false);
-    }
-
-    function forceGithubReload() {
-        tap();
-        if (window.NativeAdmin && window.NativeAdmin.forceSyncGithubUpdate) {
-            window.NativeAdmin.forceSyncGithubUpdate();
-        } else {
-            location.reload();
-        }
-    }
-
+    lastGeneratedBatch=keys.join('\n');result.textContent=lastGeneratedBatch;result.classList.remove('hidden');copy.classList.remove('hidden');
+    toast(`${keys.length} password(s) created`);await refreshAllData(false);
+  }catch(e){toast('Could not save passwords. Check Firebase rules and connection.');}
+  finally{if(button){button.disabled=false;button.textContent=prefix==='single'?'Generate Password':'Generate Bulk Passwords';}}
+}
+async function generateSingleKey(){tap();await uploadKeys(1,'single','singleResult','singleCopy');}
+async function generateBulkKeys(){tap();const qty=Math.max(1,Math.min(100,parseInt(document.getElementById('bulkQty').value,10)||1));await uploadKeys(qty,'bulk','bulkResult','bulkCopy');}
+async function refreshAllData(showToast){
+  if(showToast)tap();
+  try{
+    const [kRes,tRes,cRes,bRes]=await Promise.all([
+      fetch(`${DB_URL}/keys.json`),fetch(`${DB_URL}/trials.json`),fetch(`${DB_URL}/config.json`),fetch(`${DB_URL}/blacklist.json`)
+    ]);
+    if(!kRes.ok||!tRes.ok||!cRes.ok||!bRes.ok)throw new Error('Firebase read failed');
+    cachedKeys=await kRes.json()||{};currentTrials=await tRes.json()||{};const config=await cRes.json()||{};currentBlacklist=await bRes.json()||{};
+    renderKeysList();renderConfigForm(config);renderHwidLists(currentTrials,currentBlacklist);
+    if(showToast)toast('Synced');
+  }catch(e){toast('Sync failed. Check connection / Firebase rules.');}
+}
+function safeText(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderKeysList(){
+  const box=document.getElementById('keysContainer');const q=(document.getElementById('searchKeyInput').value||'').trim().toLowerCase();box.innerHTML='';
+  const list=Object.values(cachedKeys).filter(Boolean).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(!list.length){box.innerHTML='<div class="empty">No passwords found.</div>';return;}
+  let shown=0;const now=Date.now();
+  list.forEach(k=>{
+    const key=String(k.key||'');if(!key)return;
+    const devices=k.devices||{};const hwids=Object.keys(devices);if(k.hwid&&!devices[k.hwid])hwids.push(k.hwid);
+    const target=`${key} ${k.owner||''} ${hwids.join(' ')}`.toLowerCase();if(q&&!target.includes(q))return;
+    shown++;const blocked=k.blocked===true||String(k.status||'').toUpperCase()==='BLOCKED';const expired=!!k.expiryTime&&now>=Number(k.expiryTime);
+    const max=Math.max(1,Number(k.maxDevices)||1);let remaining=k.durationLabel||((k.durationHours||0)+'h');
+    if(k.expiryTime&&now<k.expiryTime){const mins=Math.floor((k.expiryTime-now)/60000);remaining=mins>60?`${Math.floor(mins/60)}h ${mins%60}m left`:`${mins}m left`;}
+    const badge=blocked?'<span class="badge block">BLOCKED</span>':expired?'<span class="badge exp">EXPIRED</span>':`<span class="badge">ACTIVE · ${hwids.length}/${max}</span>`;
+    const safeKey=safeText(key),safeOwner=safeText(k.owner||'Admin'),safeHwid=safeText(hwids.join(', ')||'No device bound');
+    const card=document.createElement('div');card.className='key-card';
+    card.innerHTML=`<div class="key-top"><span class="key-code">${safeKey}</span>${badge}</div><div class="meta">Owner: ${safeOwner}<br>Time: ${safeText(remaining)}<br>Devices (${hwids.length}/${max}): ${safeHwid}</div><div class="actions"><button class="btn small blue" data-action="copy">Copy</button><button class="btn small ${blocked?'secondary':'warn'}" data-action="block">${blocked?'Unblock':'Block'}</button><button class="btn small warn" data-action="expire">Expire</button><button class="btn small secondary" data-action="reset">Reset Slots</button><button class="btn small danger" data-action="delete">Delete</button></div>`;
+    card.querySelector('[data-action="copy"]').onclick=()=>copyText(key,'Password copied');
+    card.querySelector('[data-action="block"]').onclick=()=>toggleBlockKey(key,!blocked);
+    card.querySelector('[data-action="expire"]').onclick=()=>expireKeyNow(key);
+    card.querySelector('[data-action="reset"]').onclick=()=>resetKeySlots(key);
+    card.querySelector('[data-action="delete"]').onclick=()=>deleteKey(key);
+    box.appendChild(card);
+  });
+  if(!shown)box.innerHTML='<div class="empty">No matching passwords.</div>';
+}
+async function toggleBlockKey(key,state){tap();try{const r=await fetch(`${DB_URL}/keys/${encodeURIComponent(key)}/blocked.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)});if(!r.ok)throw 0;toast(state?'Password blocked':'Password unblocked');await refreshAllData(false);}catch(e){toast('Block update failed');}}
+async function expireKeyNow(key){tap();if(!await askConfirm('Expire this password now?'))return;try{const r=await fetch(`${DB_URL}/keys/${encodeURIComponent(key)}/expiryTime.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(Date.now()-5000)});if(!r.ok)throw 0;toast('Password expired');await refreshAllData(false);}catch(e){toast('Could not expire password');}}
+async function resetKeySlots(key){tap();if(!await askConfirm('Clear all registered devices for this password?'))return;try{await Promise.all([fetch(`${DB_URL}/keys/${encodeURIComponent(key)}/devices.json`,{method:'DELETE'}),fetch(`${DB_URL}/keys/${encodeURIComponent(key)}/hwid.json`,{method:'DELETE'}),fetch(`${DB_URL}/keys/${encodeURIComponent(key)}/usedDevices.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:'0'})]);toast('Device slots reset');await refreshAllData(false);}catch(e){toast('Reset failed');}}
+async function deleteKey(key){tap();if(!await askConfirm('Permanently delete this password?'))return;try{const r=await fetch(`${DB_URL}/keys/${encodeURIComponent(key)}.json`,{method:'DELETE'});if(!r.ok)throw 0;toast('Password deleted');await refreshAllData(false);}catch(e){toast('Delete failed');}}
+function setContactPreset(label,url){tap();document.getElementById('cfgBuyText').value=label;const input=document.getElementById('cfgBuyUrl');if(!input.value.startsWith(url))input.value=url;}
+function setSwitch(id,value){document.getElementById(id).checked=value!==false;}
+function renderConfigForm(cfg){
+  document.getElementById('cfgBuyText').value=cfg.buyButtonText||'';document.getElementById('cfgBuyUrl').value=cfg.buyUrl||'';
+  document.getElementById('cfgBroadcast').value=cfg.broadcastMessage||'';document.getElementById('cfgTrialEnabled').checked=cfg.trialEnabled!==false;
+  document.getElementById('cfgMaintenance').checked=cfg.maintenance===true;document.getElementById('cfgLoginDialog').checked=cfg.loginDialogEnabled!==false;
+  document.getElementById('cfgUpdateDialog').checked=cfg.updateDialogEnabled!==false;document.getElementById('cfgVerCode').value=cfg.versionCode||1;
+  document.getElementById('cfgVerName').value=cfg.versionName||'1.0';document.getElementById('cfgApkUrl').value=cfg.apkUrl||'';
+  document.getElementById('cfgChangelog').value=cfg.changelog||'';document.getElementById('cfgMaintenanceMessage').value=cfg.maintenanceMessage||'';
+  document.getElementById('cfgLoginDisabledMessage').value=cfg.loginDisabledMessage||'';
+}
+async function saveRemoteConfig(){
+  tap();const payload={
+    buyButtonText:document.getElementById('cfgBuyText').value.trim(),buyUrl:document.getElementById('cfgBuyUrl').value.trim(),
+    broadcastMessage:document.getElementById('cfgBroadcast').value.trim(),trialEnabled:document.getElementById('cfgTrialEnabled').checked,
+    maintenance:document.getElementById('cfgMaintenance').checked,loginDialogEnabled:document.getElementById('cfgLoginDialog').checked,
+    updateDialogEnabled:document.getElementById('cfgUpdateDialog').checked,versionCode:Math.max(1,parseInt(document.getElementById('cfgVerCode').value,10)||1),
+    versionName:document.getElementById('cfgVerName').value.trim()||'1.0',apkUrl:document.getElementById('cfgApkUrl').value.trim(),
+    changelog:document.getElementById('cfgChangelog').value.trim(),maintenanceMessage:document.getElementById('cfgMaintenanceMessage').value.trim(),
+    loginDisabledMessage:document.getElementById('cfgLoginDisabledMessage').value.trim()
+  };
+  try{const r=await fetch(`${DB_URL}/config.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!r.ok)throw 0;toast('Settings saved');}catch(e){toast('Settings save failed');}
+}
+function renderHwidLists(trials,blacklist){
+  const b=document.getElementById('blacklistContainer');b.innerHTML='';let bCount=0;
+  Object.keys(blacklist||{}).forEach(hwid=>{if(!blacklist[hwid])return;bCount++;const row=document.createElement('div');row.className='key-card';row.innerHTML=`<div class="key-top"><span class="key-code" style="color:var(--red)">${safeText(hwid)}</span><button class="btn small secondary">Unblock</button></div>`;row.querySelector('button').onclick=()=>unbanHwid(hwid);b.appendChild(row);});
+  if(!bCount)b.innerHTML='<div class="empty">No blocked devices.</div>';
+  const t=document.getElementById('trialsContainer');t.innerHTML='';let tCount=0;
+  Object.values(trials||{}).forEach(item=>{if(!item||!item.hwid)return;tCount++;const expired=Date.now()>(Number(item.expiry)||0);const row=document.createElement('div');row.className='key-card';row.innerHTML=`<div class="key-top"><span class="key-code">${safeText(item.hwid)}</span><span class="badge ${expired?'exp':''}">${expired?'EXPIRED':'ACTIVE TRIAL'}</span></div><div class="actions"><button class="btn small secondary">Reset Trial</button><button class="btn small danger">Block Device</button></div>`;const buttons=row.querySelectorAll('button');buttons[0].onclick=()=>resetTrialHwid(item.hwid);buttons[1].onclick=()=>banTrialHwid(item.hwid);t.appendChild(row);});
+  if(!tCount)t.innerHTML='<div class="empty">No trial claims yet.</div>';
+}
+async function blacklistHwid(){tap();const hwid=document.getElementById('blkHwidInput').value.trim().toUpperCase();if(!hwid){toast('Enter HWID first');return;}try{const r=await fetch(`${DB_URL}/blacklist/${encodeURIComponent(hwid)}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:'true'});if(!r.ok)throw 0;document.getElementById('blkHwidInput').value='';toast('Device blocked');await refreshAllData(false);}catch(e){toast('Could not block device');}}
+async function unbanHwid(hwid){tap();if(!await askConfirm('Unblock this device?'))return;await fetch(`${DB_URL}/blacklist/${encodeURIComponent(hwid)}.json`,{method:'DELETE'});toast('Device unblocked');await refreshAllData(false);}
+async function resetTrialHwid(hwid){tap();if(!await askConfirm('Reset trial for this device?'))return;await fetch(`${DB_URL}/trials/${encodeURIComponent(hwid)}.json`,{method:'DELETE'});toast('Trial reset');await refreshAllData(false);}
+async function banTrialHwid(hwid){tap();if(!await askConfirm('Block this device HWID?'))return;await fetch(`${DB_URL}/blacklist/${encodeURIComponent(hwid)}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:'true'});toast('Device blocked');await refreshAllData(false);}
+function forceGithubReload(){tap();if(window.NativeAdmin&&window.NativeAdmin.forceSyncGithubUpdate)window.NativeAdmin.forceSyncGithubUpdate();else location.reload();}
 </script>
 </body>
 </html>
