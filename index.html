@@ -119,6 +119,12 @@
         .b-exp { background: rgba(245,158,11,.13); color: #FCD34D; }
         .key-meta { margin-bottom: 11px; color: var(--sub); font-size: 10px; line-height: 1.7; overflow-wrap: anywhere; }
         .action-bar { display: flex; flex-wrap: wrap; gap: 6px; }
+        .password-select { width: 18px; min-width: 18px; height: 18px; min-height: 18px; margin: 1px 8px 0 0; padding: 0; accent-color: var(--accent); appearance: auto; -webkit-appearance: auto; }
+        .password-card-title { display: flex; align-items: flex-start; min-width: 0; flex: 1; }
+        .password-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+        .btn:disabled { opacity: .38; cursor: not-allowed; transform: none; }
+        .key-card .key-top { align-items: center; }
+        .empty-state { padding: 24px 14px; text-align: center; color: var(--sub); font-size: 12px; }
         .section-gap { height: 3px; }
         .helper { margin-top: 6px; color: var(--muted); font-size: 10px; line-height: 1.45; }
         .control-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid var(--line-soft); }
@@ -195,23 +201,24 @@
     <main>
         <section id="tabGenerate" class="page active">
             <div class="page-heading">
-                <div class="eyebrow">LICENSE OPERATIONS</div>
-                <h1 class="page-title" id="activePageTitle">Generate keys</h1>
-                <p class="page-desc">Create access keys and define how many devices can activate each license.</p>
+                <div class="eyebrow">PASSWORD OPERATIONS</div>
+                <h1 class="page-title" id="activePageTitle">Generate passwords</h1>
+                <p class="page-desc">Create one password or generate a batch of up to 100 passwords in one action.</p>
             </div>
             <div class="stats-row">
                 <div class="stat-pill"><div class="stat-lbl">TOTAL LICENSES</div><div class="stat-num" id="stTotalKeys">0</div></div>
                 <div class="stat-pill"><div class="stat-lbl">TRIAL DEVICES</div><div class="stat-num" id="stTotalTrials">0</div></div>
             </div>
             <div class="card">
-                <div class="card-head"><span>Create license keys</span><small>1–100 per batch</small></div>
+                <div class="card-head"><span>Bulk password generator</span><small>Single or 1–100 batch</small></div>
                 <div class="grid-2">
-                    <div class="field"><label for="genQty">KEY QUANTITY</label><input type="number" id="genQty" value="1" min="1" max="100" inputmode="numeric"></div>
-                    <div class="field"><label for="genMaxDevices">DEVICE SLOTS</label><input type="number" id="genMaxDevices" value="1" min="1" max="500" inputmode="numeric"></div>
+                    <div class="field"><label for="genQty">PASSWORD QUANTITY (1 = SINGLE, 2–100 = BULK)</label><input type="number" id="genQty" value="1" min="1" max="100" inputmode="numeric"></div>
+                    <div class="field"><label for="genQuickQty">QUICK BATCH SIZE</label><select id="genQuickQty" onchange="setGenerateQuantity(this.value)"><option value="1">1 password</option><option value="10">10 passwords</option><option value="25">25 passwords</option><option value="50">50 passwords</option><option value="100">100 passwords</option></select></div>
                 </div>
+                <div class="field"><label for="genMaxDevices">DEVICE SLOTS PER PASSWORD</label><input type="number" id="genMaxDevices" value="1" min="1" max="500" inputmode="numeric"></div>
                 <div class="field"><label for="genPreset">LICENSE DURATION</label>
                     <select id="genPreset" onchange="toggleCustomTime()">
-                        <option value="24">1 day</option><option value="168">7 days</option><option value="720">30 days</option><option value="custom">Custom duration</option>
+                        <option value="24">1 day</option><option value="168">7 days</option><option value="720">30 days</option><option value="8760">1 year</option><option value="custom">Custom duration</option>
                     </select>
                 </div>
                 <div id="customTimeRow" class="grid-2 hidden">
@@ -219,22 +226,52 @@
                     <div class="field"><label for="customTimeUnit">TIME UNIT</label><select id="customTimeUnit"><option value="minutes">Minutes</option><option value="hours">Hours</option><option value="days">Days</option></select></div>
                 </div>
                 <div class="field"><label for="genOwner">OWNER / RESELLER NOTE</label><input type="text" id="genOwner" placeholder="Optional owner name"></div>
-                <button class="btn" onclick="generateKeysBatch()">＋ Generate and upload</button>
+                <button class="btn" id="generatePasswordsBtn" onclick="generateKeysBatch()">＋ Generate passwords</button>
             </div>
             <div id="generatedResultCard" class="card hidden">
-                <div class="card-head"><span>Newly issued keys</span><button class="btn btn-sm btn-blue" onclick="copyGeneratedBatch()">Copy all</button></div>
+                <div class="card-head"><span>Generated passwords</span><button class="btn btn-sm btn-blue" onclick="copyGeneratedBatch()">Copy all</button></div>
                 <div id="generatedKeysBox" class="mono" style="font-size:12px;color:var(--accent-2);white-space:pre-wrap;overflow-wrap:anywhere;background:var(--input);padding:13px;border-radius:12px;border:1px solid var(--line);"></div>
             </div>
         </section>
 
         <section id="tabKeys" class="page">
-            <div class="page-heading"><div class="eyebrow">ACCESS MANAGEMENT</div><h1 class="page-title">License keys</h1><p class="page-desc">Search, block, expire, reset device slots or remove a license.</p></div>
-            <div class="card" style="padding:12px;"><input type="search" id="searchKeyInput" placeholder="Search key, device ID or owner…" style="margin:0" oninput="renderKeysList()"></div>
+            <div class="page-heading"><div class="eyebrow">PASSWORD & USER MANAGEMENT</div><h1 class="page-title">Password management</h1><p class="page-desc">Find any issued password, inspect its owner and devices, then block, unblock, expire, reset or delete it.</p></div>
+            <div class="stats-row">
+                <div class="stat-pill"><div class="stat-lbl">TOTAL PASSWORDS</div><div class="stat-num" id="passTotal">0</div></div>
+                <div class="stat-pill"><div class="stat-lbl">ACTIVE</div><div class="stat-num" id="passActive">0</div></div>
+                <div class="stat-pill"><div class="stat-lbl">BLOCKED</div><div class="stat-num" id="passBlocked">0</div></div>
+                <div class="stat-pill"><div class="stat-lbl">EXPIRED</div><div class="stat-num" id="passExpired">0</div></div>
+            </div>
+            <div class="card">
+                <div class="field"><label for="searchKeyInput">SEARCH PASSWORD / OWNER / DEVICE ID</label><input type="search" id="searchKeyInput" placeholder="Type password, owner or HWID…" style="margin:0" oninput="renderKeysList()"></div>
+                <div class="field" style="margin-top:12px"><label for="passwordFilter">FILTER PASSWORDS</label><select id="passwordFilter" onchange="renderKeysList()"><option value="all">All passwords</option><option value="active">Active only</option><option value="blocked">Blocked only</option><option value="expired">Expired only</option></select></div>
+                <div class="btn-row" style="margin-top:12px">
+                    <button class="btn btn-sm btn-outline" onclick="selectVisiblePasswords(true)">Select visible</button>
+                    <button class="btn btn-sm btn-outline" onclick="clearSelectedPasswords()">Clear selection</button>
+                    <button class="btn btn-sm btn-blue" id="copySelectedBtn" onclick="copySelectedPasswords()" disabled>Copy selected</button>
+                </div>
+                <div class="helper" id="selectedCount">0 passwords selected</div>
+                <div class="btn-row" style="margin-top:10px">
+                    <button class="btn btn-sm btn-warn" id="bulkBlockBtn" onclick="bulkManagePasswords('block')" disabled>Block selected</button>
+                    <button class="btn btn-sm btn-outline" id="bulkUnblockBtn" onclick="bulkManagePasswords('unblock')" disabled>Unblock selected</button>
+                    <button class="btn btn-sm btn-danger" id="bulkDeleteBtn" onclick="bulkManagePasswords('delete')" disabled>Delete selected</button>
+                </div>
+            </div>
             <div id="keysContainer"></div>
         </section>
 
         <section id="tabConfig" class="page">
             <div class="page-heading"><div class="eyebrow">REMOTE CLIENT SETTINGS</div><h1 class="page-title">Client controls</h1><p class="page-desc">These settings are read by the Android login dialog from Firebase <span class="mono">/config</span>.</p></div>
+
+            <div class="card">
+                <div class="card-head"><span>Login dialog control</span><small>Remote access gate</small></div>
+                <div class="control-row">
+                    <div><div class="control-title">Client login dialog</div><div class="control-desc">ON shows the normal license login. OFF locks client access and shows a closed notice; it does not bypass license verification.</div></div>
+                    <select id="cfgLoginDialogEnabled" aria-label="Client login dialog"><option value="true">ON</option><option value="false">OFF</option></select>
+                </div>
+                <div class="field" style="margin-top:13px"><label for="cfgLoginDisabledMessage">LOGIN DISABLED MESSAGE</label><textarea id="cfgLoginDisabledMessage" placeholder="Client access is temporarily disabled by Admin."></textarea></div>
+                <button class="btn" onclick="saveRemoteConfig()">Save login dialog setting</button>
+            </div>
 
             <div class="card">
                 <div class="card-head"><span>Access & availability</span><small>Live client behaviour</small></div>
@@ -263,18 +300,18 @@
             </div>
 
             <div class="card">
-                <div class="card-head"><span>App update control</span><small>Client update notice</small></div>
+                <div class="card-head"><span>Update dialog control</span><small>Client update notice</small></div>
                 <div class="grid-2">
                     <div class="field"><label for="cfgVerCode">VERSION CODE</label><input type="number" id="cfgVerCode" value="1" min="1" inputmode="numeric"></div>
                     <div class="field"><label for="cfgVerName">VERSION NAME</label><input type="text" id="cfgVerName" value="1.0" placeholder="e.g. 2.1"></div>
                 </div>
                 <div class="control-row">
-                    <div><div class="control-title">Force client update</div><div class="control-desc">Hide the login form and show the update screen.</div></div>
-                    <select id="cfgForceUpdate" aria-label="Force client update"><option value="false">Disabled</option><option value="true">Enabled</option></select>
+                    <div><div class="control-title">Update dialog</div><div class="control-desc">ON shows the update dialog. OFF returns the client to normal login.</div></div>
+                    <select id="cfgForceUpdate" aria-label="Update dialog"><option value="false">OFF</option><option value="true">ON</option></select>
                 </div>
                 <div class="field" style="margin-top:13px"><label for="cfgChangelog">UPDATE NOTES / CHANGELOG</label><textarea id="cfgChangelog" placeholder="What changed in this release?" ></textarea></div>
                 <div class="field"><label for="cfgApkUrl">APK DOWNLOAD URL</label><input type="url" id="cfgApkUrl" placeholder="https://example.com/app.apk"></div>
-                <div class="helper">To activate forced update, set Version Code above 1 and enable the switch. Maintenance mode takes priority.</div>
+                <div class="helper">To show the update dialog, set Version Code above 1, enable the switch and provide an APK URL. Maintenance mode takes priority.</div>
                 <button class="btn" style="margin-top:14px" onclick="saveRemoteConfig()">Save update settings</button>
             </div>
 
@@ -313,7 +350,7 @@
 
     <nav class="bottom-nav" aria-label="Main navigation">
         <div class="nav-item active" onclick="switchTab('tabGenerate', this)"><span class="nav-icon">＋</span><span class="nav-label">GENERATE</span></div>
-        <div class="nav-item" onclick="switchTab('tabKeys', this)"><span class="nav-icon">▤</span><span class="nav-label">LICENSES</span></div>
+        <div class="nav-item" onclick="switchTab('tabKeys', this)"><span class="nav-icon">▤</span><span class="nav-label">PASSWORDS</span></div>
         <div class="nav-item" onclick="switchTab('tabConfig', this)"><span class="nav-icon">⚙</span><span class="nav-label">CLIENT</span></div>
         <div class="nav-item" onclick="switchTab('tabHwid', this)"><span class="nav-icon">⌁</span><span class="nav-label">DEVICES</span></div>
     </nav>
@@ -324,6 +361,7 @@
     const MASTER_PIN = "NafisAdmin99";
     let cachedKeys = {};
     let lastGeneratedBatch = "";
+    const selectedPasswordKeys = new Set();
 
     function tap() {
         if (window.NativeAdmin && window.NativeAdmin.hapticTap) {
@@ -355,7 +393,7 @@
             document.getElementById("authOverlay").classList.add("hidden");
             refreshAllData(false);
         }
-        ["cfgBroadcast", "cfgTrialEnabled", "cfgMaintenance", "cfgForceUpdate"].forEach(id => {
+        ["cfgLoginDialogEnabled", "cfgLoginDisabledMessage", "cfgBroadcast", "cfgTrialEnabled", "cfgMaintenance", "cfgMaintenanceMessage", "cfgForceUpdate", "cfgVerCode", "cfgChangelog"].forEach(id => {
             document.getElementById(id)?.addEventListener("input", updateClientPreview);
             document.getElementById(id)?.addEventListener("change", updateClientPreview);
         });
@@ -385,86 +423,113 @@
         if (label && title) title.textContent = label.textContent.trim();
     }
 
+    function setGenerateQuantity(value) {
+        const qty = Math.min(100, Math.max(1, parseInt(value, 10) || 1));
+        document.getElementById("genQty").value = qty;
+    }
+
     function toggleCustomTime() {
         const v = document.getElementById("genPreset").value;
         document.getElementById("customTimeRow").classList.toggle("hidden", v !== "custom");
     }
 
-    function generateRandomKey() {
+    function generateRandomKey(usedKeys = new Set()) {
         const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        while (true) {
-            let s = "", sum = 0;
-            for (let i = 0; i < 8; i++) {
-                const c = chars.charAt(Math.floor(Math.random() * chars.length));
-                s += c; sum += c.charCodeAt(0);
+        for (let attempt = 0; attempt < 100; attempt++) {
+            const bytes = new Uint8Array(8);
+            if (window.crypto && window.crypto.getRandomValues) {
+                window.crypto.getRandomValues(bytes);
+            } else {
+                for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
             }
-            if (sum % 7 === 0) return "VIP-" + s;
+            let value = "VIP-";
+            for (let i = 0; i < bytes.length; i++) value += chars[bytes[i] % chars.length];
+            if (!usedKeys.has(value)) return value;
         }
+        throw new Error("Could not create a unique password. Try again.");
     }
 
     // 1. BATCH GENERATE KEYS (1 TO 100 KEYS + 1 TO 50+ DEVICE SLOTS + CUSTOM TIME)
     async function generateKeysBatch() {
         tap();
-        const qty = Math.min(100, Math.max(1, parseInt(document.getElementById("genQty").value) || 1));
-        const maxDevices = Math.max(1, parseInt(document.getElementById("genMaxDevices").value) || 1);
+        const qtyRaw = parseInt(document.getElementById("genQty").value, 10);
+        const qty = Math.min(100, Math.max(1, Number.isFinite(qtyRaw) ? qtyRaw : 1));
+        const maxDevices = Math.min(500, Math.max(1, parseInt(document.getElementById("genMaxDevices").value, 10) || 1));
         const owner = document.getElementById("genOwner").value.trim() || "Admin";
         const preset = document.getElementById("genPreset").value;
 
         let durationHours = 24;
-        let durationMs = 24 * 3600 * 1000;
+        let durationMs = 24 * 60 * 60 * 1000;
         let label = "1 Day";
-
         if (preset !== "custom") {
-            durationHours = parseInt(preset);
-            durationMs = durationHours * 3600 * 1000;
-            label = (durationHours / 24) + " Days";
+            durationHours = Math.max(1, parseInt(preset, 10) || 24);
+            durationMs = durationHours * 60 * 60 * 1000;
+            label = durationHours % 24 === 0 ? (durationHours / 24) + (durationHours === 24 ? " Day" : " Days") : durationHours + " Hours";
         } else {
-            const val = Math.max(1, parseInt(document.getElementById("customTimeVal").value) || 1);
+            const val = Math.max(1, parseInt(document.getElementById("customTimeVal").value, 10) || 1);
             const unit = document.getElementById("customTimeUnit").value;
             if (unit === "minutes") {
                 durationMs = val * 60 * 1000;
                 durationHours = Math.max(1, Math.ceil(val / 60));
                 label = val + " Min";
             } else if (unit === "hours") {
-                durationMs = val * 3600 * 1000;
+                durationMs = val * 60 * 60 * 1000;
                 durationHours = val;
                 label = val + " Hours";
             } else {
-                durationMs = val * 24 * 3600 * 1000;
+                durationMs = val * 24 * 60 * 60 * 1000;
                 durationHours = val * 24;
                 label = val + " Days";
             }
         }
 
-        toast("Generating " + qty + " keys...");
-        const now = Date.now();
-        const newKeys = [];
+        const generateButton = document.getElementById("generatePasswordsBtn");
+        generateButton.disabled = true;
+        generateButton.textContent = "Generating…";
+        try {
+            toast("Generating " + qty + " password(s)…");
+            const now = Date.now();
+            const usedKeys = new Set(Object.keys(cachedKeys || {}));
+            const payloadMap = {};
+            const newKeys = [];
 
-        for (let i = 0; i < qty; i++) {
-            const k = generateRandomKey();
-            newKeys.push(k);
-            const payload = {
-                key: k,
-                owner: owner,
-                maxDevices: maxDevices,
-                usedDevices: 0,
-                durationHours: durationHours,
-                durationLabel: label,
-                expiryTime: now + durationMs,
-                blocked: false,
-                createdAt: now
-            };
-            await fetch(`${DB_URL}/keys/${k}.json`, {
-                method: "PUT",
-                body: JSON.stringify(payload)
+            for (let i = 0; i < qty; i++) {
+                const key = generateRandomKey(usedKeys);
+                usedKeys.add(key);
+                newKeys.push(key);
+                payloadMap[key] = {
+                    key,
+                    owner,
+                    maxDevices,
+                    usedDevices: 0,
+                    durationHours,
+                    durationLabel: label,
+                    expiryTime: now + durationMs,
+                    blocked: false,
+                    status: "ACTIVE",
+                    createdAt: now
+                };
+            }
+
+            const response = await fetch(`${DB_URL}/keys.json`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payloadMap)
             });
-        }
+            if (!response.ok) throw new Error(`Firebase returned HTTP ${response.status}`);
 
-        lastGeneratedBatch = newKeys.join("\n");
-        document.getElementById("generatedResultCard").classList.remove("hidden");
-        document.getElementById("generatedKeysBox").innerText = lastGeneratedBatch;
-        toast(qty + " Keys Generated (" + maxDevices + " Slots each)");
-        refreshAllData(false);
+            lastGeneratedBatch = newKeys.join("\n");
+            document.getElementById("generatedResultCard").classList.remove("hidden");
+            document.getElementById("generatedKeysBox").innerText = lastGeneratedBatch;
+            toast(qty + (qty === 1 ? " password generated" : " passwords generated") + " • " + maxDevices + " device slot(s) each");
+            await refreshAllData(false);
+        } catch (error) {
+            console.error(error);
+            toast("Password generation failed: " + (error.message || "check Firebase rules"));
+        } finally {
+            generateButton.disabled = false;
+            generateButton.textContent = "＋ Generate passwords";
+        }
     }
 
     function copyGeneratedBatch() {
@@ -482,6 +547,7 @@
                 fetch(`${DB_URL}/blacklist.json`)
             ]);
 
+            if (!kRes.ok || !tRes.ok || !cRes.ok || !bRes.ok) throw new Error("Firebase read failed");
             cachedKeys = await kRes.json() || {};
             const trials = await tRes.json() || {};
             const config = await cRes.json() || {};
@@ -499,96 +565,235 @@
         }
     }
 
+    function escapeHtml(value) {
+        return String(value == null ? "" : value).replace(/[&<>"']/g, ch => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+        }[ch]));
+    }
+
+    function keyPath(key) {
+        return `${DB_URL}/keys/${encodeURIComponent(String(key))}.json`;
+    }
+
+    function passwordStatus(record, now = Date.now()) {
+        if (record.blocked === true || String(record.status || "").toUpperCase() === "BLOCKED") return "blocked";
+        if (Number(record.expiryTime || 0) > 0 && now >= Number(record.expiryTime)) return "expired";
+        return "active";
+    }
+
+    function updatePasswordStats(entries) {
+        const now = Date.now();
+        let active = 0, blocked = 0, expired = 0;
+        entries.forEach(([, record]) => {
+            const status = passwordStatus(record, now);
+            if (status === "blocked") blocked++;
+            else if (status === "expired") expired++;
+            else active++;
+        });
+        document.getElementById("passTotal").textContent = entries.length;
+        document.getElementById("passActive").textContent = active;
+        document.getElementById("passBlocked").textContent = blocked;
+        document.getElementById("passExpired").textContent = expired;
+    }
+
+    function updateBulkPasswordToolbar() {
+        const count = selectedPasswordKeys.size;
+        const countNode = document.getElementById("selectedCount");
+        if (countNode) countNode.textContent = `${count} password(s) selected`;
+        ["copySelectedBtn", "bulkBlockBtn", "bulkUnblockBtn", "bulkDeleteBtn"].forEach(id => {
+            const node = document.getElementById(id);
+            if (node) node.disabled = count === 0;
+        });
+    }
+
     function renderKeysList() {
         const box = document.getElementById("keysContainer");
         const q = (document.getElementById("searchKeyInput").value || "").trim().toLowerCase();
+        const filter = document.getElementById("passwordFilter").value || "all";
         box.innerHTML = "";
 
-        const list = Object.values(cachedKeys).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-        if (list.length === 0) {
-            box.innerHTML = `<div class="card" style="text-align:center; color:var(--text-sub); font-size:13px;">No licenses found in database.</div>`;
+        const entries = Object.entries(cachedKeys || {}).map(([dbKey, value]) => {
+            const record = value || {};
+            return [record.key || dbKey, { ...record, key: record.key || dbKey }];
+        }).sort((a, b) => (Number(b[1].createdAt) || 0) - (Number(a[1].createdAt) || 0));
+        updatePasswordStats(entries);
+        const known = new Set(entries.map(([key]) => key));
+        for (const selected of Array.from(selectedPasswordKeys)) if (!known.has(selected)) selectedPasswordKeys.delete(selected);
+
+        const now = Date.now();
+        const visible = entries.filter(([key, record]) => {
+            const devObj = record.devices || {};
+            const hwids = Object.keys(devObj);
+            if (record.hwid && !devObj[record.hwid]) hwids.push(record.hwid);
+            const searchTarget = `${key} ${record.owner || ""} ${hwids.join(" ")}`.toLowerCase();
+            if (q && !searchTarget.includes(q)) return false;
+            return filter === "all" || passwordStatus(record, now) === filter;
+        });
+
+        if (visible.length === 0) {
+            box.innerHTML = `<div class="card empty-state">${entries.length ? "No passwords match this search or filter." : "No passwords found. Generate passwords from the Generate tab."}</div>`;
+            updateBulkPasswordToolbar();
             return;
         }
 
-        const now = Date.now();
-        list.forEach(k => {
-            const devObj = k.devices || {};
+        visible.forEach(([key, record]) => {
+            const devObj = record.devices || {};
             const hwidList = Object.keys(devObj);
-            if (k.hwid && !devObj[k.hwid]) hwidList.push(k.hwid);
-
-            const searchTarget = `${k.key} ${k.owner || ""} ${hwidList.join(" ")}`.toLowerCase();
-            if (q && !searchTarget.includes(q)) return;
-
-            const maxSlots = Math.max(1, k.maxDevices || 1);
-            const usedSlots = hwidList.length;
-            const isBlocked = k.blocked === true;
-            const isExpired = k.expiryTime && now >= k.expiryTime;
-
-            let badgeHtml = `<span class="badge b-active">ACTIVE • ${usedSlots}/${maxSlots} SLOTS</span>`;
-            if (isBlocked) badgeHtml = `<span class="badge b-block">BLOCKED BY ADMIN</span>`;
-            else if (isExpired) badgeHtml = `<span class="badge b-exp">EXPIRED</span>`;
-
-            let remText = k.durationLabel || (k.durationHours + "h");
-            if (k.expiryTime && now < k.expiryTime) {
-                const remMins = Math.floor((k.expiryTime - now) / 60000);
-                remText = remMins > 60 ? `${Math.floor(remMins/60)}h ${remMins%60}m left` : `${remMins}m left`;
-            }
-
+            if (record.hwid && !devObj[record.hwid]) hwidList.push(record.hwid);
+            const maxSlots = Math.max(1, Number(record.maxDevices) || 1);
+            const usedSlots = hwidList.length || Number(record.usedDevices) || 0;
+            const status = passwordStatus(record, now);
+            const statusLabel = status === "blocked" ? "BLOCKED" : status === "expired" ? "EXPIRED" : `ACTIVE • ${usedSlots}/${maxSlots} DEVICES`;
+            const badgeClass = status === "blocked" ? "b-block" : status === "expired" ? "b-exp" : "b-active";
+            const expiry = Number(record.expiryTime) || 0;
+            const remaining = expiry > now ? formatRemaining(expiry - now) : (expiry ? "Expired" : "No expiry recorded");
+            const keyArg = escapeHtml(JSON.stringify(key));
+            const owner = escapeHtml(record.owner || "Admin");
+            const safeHwids = escapeHtml(hwidList.join(", ") || "No device bound yet");
+            const created = Number(record.createdAt) ? new Date(Number(record.createdAt)).toLocaleString() : "Unknown";
             box.innerHTML += `
-                <div class="key-card">
+                <article class="key-card">
                     <div class="key-top">
-                        <span class="key-code" onclick="copyText('${k.key}', 'Copied ${k.key}')">${k.key}</span>
-                        ${badgeHtml}
+                        <div class="password-card-title">
+                            <input class="password-select" type="checkbox" aria-label="Select password ${escapeHtml(key)}" ${selectedPasswordKeys.has(key) ? "checked" : ""} onchange='togglePasswordSelection(${keyArg}, this.checked)'>
+                            <span class="key-code" onclick='copyText(${keyArg}, "Password copied")'>${escapeHtml(key)}</span>
+                        </div>
+                        <span class="badge ${badgeClass}">${statusLabel}</span>
                     </div>
                     <div class="key-meta">
-                        Owner: ${k.owner || "Admin"} • Time: ${remText}<br>
-                        HWIDs (${usedSlots}/${maxSlots}): ${hwidList.length ? hwidList.join(", ") : "No device bound yet"}
+                        Owner: ${owner}<br>
+                        Expiry: ${escapeHtml(remaining)}<br>
+                        Devices (${usedSlots}/${maxSlots}): ${safeHwids}<br>
+                        Created: ${escapeHtml(created)}
                     </div>
                     <div class="action-bar">
-                        <button class="btn btn-sm btn-blue" onclick="copyText('${k.key}', 'Key Copied')">COPY</button>
-                        <button class="btn btn-sm ${isBlocked ? 'btn-outline' : 'btn-warn'}" onclick="toggleBlockKey('${k.key}', ${!isBlocked})">
-                            ${isBlocked ? 'UNBLOCK' : 'BLOCK USER'}
-                        </button>
-                        <button class="btn btn-sm btn-warn" onclick="expireKeyNow('${k.key}')">EXPIRE NOW</button>
-                        <button class="btn btn-sm btn-outline" onclick="resetKeySlots('${k.key}')">RESET SLOTS</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteKey('${k.key}')">DEL</button>
+                        <button class="btn btn-sm btn-blue" onclick='copyText(${keyArg}, "Password copied")'>Copy</button>
+                        <button class="btn btn-sm ${status === "blocked" ? "btn-outline" : "btn-warn"}" onclick='toggleBlockKey(${keyArg}, ${status !== "blocked"})'>${status === "blocked" ? "Unblock" : "Block user"}</button>
+                        <button class="btn btn-sm btn-warn" onclick='expireKeyNow(${keyArg})'>Expire now</button>
+                        <button class="btn btn-sm btn-outline" onclick='resetKeySlots(${keyArg})'>Reset devices</button>
+                        <button class="btn btn-sm btn-danger" onclick='deleteKey(${keyArg})'>Delete</button>
                     </div>
-                </div>`;
+                </article>`;
         });
+        updateBulkPasswordToolbar();
+    }
+
+    function formatRemaining(ms) {
+        const mins = Math.max(0, Math.floor(ms / 60000));
+        if (mins >= 1440) return `${Math.floor(mins / 1440)}d ${Math.floor((mins % 1440) / 60)}h left`;
+        if (mins >= 60) return `${Math.floor(mins / 60)}h ${mins % 60}m left`;
+        return `${mins}m left`;
+    }
+
+    function togglePasswordSelection(key, checked) {
+        if (checked) selectedPasswordKeys.add(key);
+        else selectedPasswordKeys.delete(key);
+        updateBulkPasswordToolbar();
+    }
+
+    function selectVisiblePasswords(checked) {
+        document.querySelectorAll("#keysContainer .password-select").forEach(node => {
+            node.checked = checked;
+            const cardKey = node.nextElementSibling ? node.nextElementSibling.textContent.trim() : "";
+            if (cardKey) togglePasswordSelection(cardKey, checked);
+        });
+        updateBulkPasswordToolbar();
+    }
+
+    function clearSelectedPasswords() {
+        selectedPasswordKeys.clear();
+        renderKeysList();
+    }
+
+    function copySelectedPasswords() {
+        const selected = Array.from(selectedPasswordKeys);
+        if (!selected.length) return;
+        copyText(selected.join("\n"), `${selected.length} passwords copied`);
+    }
+
+    async function bulkManagePasswords(action) {
+        const keys = Array.from(selectedPasswordKeys);
+        if (!keys.length) return toast("Select at least one password");
+        if (action === "delete" && !confirm(`Permanently delete ${keys.length} selected password(s)?`)) return;
+        if (action === "block" && !confirm(`Block ${keys.length} selected password(s)?`)) return;
+        if (action === "unblock" && !confirm(`Unblock ${keys.length} selected password(s)?`)) return;
+        const btn = document.getElementById(action === "delete" ? "bulkDeleteBtn" : action === "block" ? "bulkBlockBtn" : "bulkUnblockBtn");
+        if (btn) btn.disabled = true;
+        try {
+            const updates = {};
+            keys.forEach(key => {
+                if (action === "delete") updates[key] = null;
+                else {
+                    const value = action === "block";
+                    updates[`${key}/blocked`] = value;
+                    updates[`${key}/status`] = value ? "BLOCKED" : "ACTIVE";
+                }
+            });
+            const response = await fetch(`${DB_URL}/keys.json`, {
+                method: "PATCH", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updates)
+            });
+            if (!response.ok) throw new Error(`Firebase returned HTTP ${response.status}`);
+            selectedPasswordKeys.clear();
+            toast(`${keys.length} password(s) ${action === "delete" ? "deleted" : action === "block" ? "blocked" : "unblocked"}`);
+            await refreshAllData(false);
+        } catch (error) {
+            toast("Bulk action failed: " + (error.message || "check Firebase rules"));
+        } finally {
+            updateBulkPasswordToolbar();
+        }
     }
 
     async function toggleBlockKey(key, blockState) {
         tap();
-        await fetch(`${DB_URL}/keys/${key}/blocked.json`, {
-            method: "PUT", body: JSON.stringify(blockState)
-        });
-        toast(blockState ? "User Blocked instantly!" : "User Unblocked!");
-        refreshAllData(false);
+        try {
+            const response = await fetch(`${DB_URL}/keys/${encodeURIComponent(key)}.json`, {
+                method: "PATCH", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ blocked: blockState, status: blockState ? "BLOCKED" : "ACTIVE" })
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            toast(blockState ? "Password blocked" : "Password unblocked");
+            await refreshAllData(false);
+        } catch (error) { toast("Block action failed: " + error.message); }
     }
 
     async function expireKeyNow(key) {
         tap();
-        await fetch(`${DB_URL}/keys/${key}/expiryTime.json`, {
-            method: "PUT", body: JSON.stringify(Date.now() - 5000)
-        });
-        toast("Key expired immediately!");
-        refreshAllData(false);
+        if (!confirm(`Expire password ${key} immediately?`)) return;
+        try {
+            const response = await fetch(`${DB_URL}/keys/${encodeURIComponent(key)}/expiryTime.json`, {
+                method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Date.now() - 5000)
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            toast("Password expired immediately");
+            await refreshAllData(false);
+        } catch (error) { toast("Expire action failed: " + error.message); }
     }
 
     async function resetKeySlots(key) {
         tap();
-        await fetch(`${DB_URL}/keys/${key}/devices.json`, { method: "DELETE" });
-        await fetch(`${DB_URL}/keys/${key}/hwid.json`, { method: "DELETE" });
-        await fetch(`${DB_URL}/keys/${key}/usedDevices.json`, { method: "PUT", body: "0" });
-        toast("Device slots cleared for " + key);
-        refreshAllData(false);
+        if (!confirm(`Remove all device bindings for ${key}?`)) return;
+        try {
+            const response = await fetch(`${DB_URL}/keys/${encodeURIComponent(key)}.json`, {
+                method: "PATCH", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ devices: null, hwid: null, usedDevices: 0 })
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            toast("Device bindings reset");
+            await refreshAllData(false);
+        } catch (error) { toast("Reset failed: " + error.message); }
     }
 
     async function deleteKey(key) {
         tap();
-        await fetch(`${DB_URL}/keys/${key}.json`, { method: "DELETE" });
-        toast("Deleted " + key);
-        refreshAllData(false);
+        if (!confirm(`Permanently delete password ${key}?`)) return;
+        try {
+            const response = await fetch(keyPath(key), { method: "DELETE" });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            selectedPasswordKeys.delete(key);
+            toast("Password deleted");
+            await refreshAllData(false);
+        } catch (error) { toast("Delete failed: " + error.message); }
     }
 
     // 3. REMOTE CLIENT CONFIG (WHATSAPP / TELEGRAM SWITCHER)
@@ -602,6 +807,8 @@
     }
 
     function renderConfigForm(cfg) {
+        document.getElementById("cfgLoginDialogEnabled").value = String(cfg.loginDialogEnabled !== false);
+        document.getElementById("cfgLoginDisabledMessage").value = cfg.loginDisabledMessage || "Client access is temporarily disabled by Admin.";
         document.getElementById("cfgBuyText").value = cfg.buyButtonText || "";
         document.getElementById("cfgBuyUrl").value = cfg.buyUrl || "";
         document.getElementById("cfgBroadcast").value = cfg.broadcastMessage || "";
@@ -638,7 +845,14 @@
             return;
         }
 
+        if (document.getElementById("cfgForceUpdate").value === "true" && !apkUrl) {
+            toast("Add an APK URL before turning the update dialog ON");
+            return;
+        }
+
         const cfgPayload = {
+            loginDialogEnabled: document.getElementById("cfgLoginDialogEnabled").value === "true",
+            loginDisabledMessage: document.getElementById("cfgLoginDisabledMessage").value.trim() || "Client access is temporarily disabled by Admin.",
             buyButtonText: document.getElementById("cfgBuyText").value.trim(),
             buyUrl,
             broadcastMessage: document.getElementById("cfgBroadcast").value.trim(),
@@ -654,7 +868,7 @@
 
         try {
             const response = await fetch(`${DB_URL}/config.json`, {
-                method: "PUT",
+                method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(cfgPayload)
             });
@@ -667,6 +881,7 @@
     }
 
     function updateClientPreview() {
+        const loginEnabled = document.getElementById("cfgLoginDialogEnabled")?.value !== "false";
         const broadcast = document.getElementById("cfgBroadcast")?.value.trim();
         const trial = document.getElementById("cfgTrialEnabled")?.value === "true";
         const maintenance = document.getElementById("cfgMaintenance")?.value === "true";
@@ -678,7 +893,7 @@
             banner.textContent = broadcast || "No broadcast message";
             banner.classList.toggle("muted", !broadcast);
         }
-        if (mode) mode.textContent = maintenance ? "Maintenance" : (forceUpdate ? "Forced update" : "Normal access");
+        if (mode) mode.textContent = !loginEnabled ? "Login dialog OFF • client access locked" : (maintenance ? "Maintenance" : (forceUpdate ? "Update dialog ON" : "Normal access"));
         if (trialState) trialState.textContent = trial ? "5-minute trial enabled" : "5-minute trial disabled";
     }
 
