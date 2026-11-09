@@ -2,341 +2,324 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nafsi Admin Engine</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0B111E">
+    <title>Nafsi Admin Console</title>
     <style>
         :root {
-            --bg-deep: #0B111E;
-            --bg-card: #111A2E;
-            --bg-input: #070B14;
-            --border: #1E293B;
+            color-scheme: dark;
+            --bg: #0B111E;
+            --surface: #111A2E;
+            --surface-2: #0E1728;
+            --input: #080E19;
+            --line: #253248;
+            --line-soft: rgba(148,163,184,.13);
             --accent: #10B981;
-            --accent-soft: #34D399;
-            --text-main: #F8FAFC;
-            --text-sub: #94A3B8;
+            --accent-2: #34D399;
+            --text: #F8FAFC;
+            --sub: #9AAAC0;
+            --muted: #718198;
             --danger: #F43F5E;
             --warn: #F59E0B;
             --blue: #38BDF8;
+            --radius: 18px;
         }
-        * {
-            box-sizing: border-box; margin: 0; padding: 0;
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none; -webkit-user-select: none;
-        }
-        input, textarea { user-select: text; -webkit-user-select: text; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { min-height: 100%; background: var(--bg); }
         body {
-            background: var(--bg-deep); color: var(--text-main);
-            min-height: 100vh; padding-bottom: 80px; overflow-x: hidden;
+            margin: 0; min-height: 100vh; overflow-x: hidden;
+            padding-bottom: calc(86px + env(safe-area-inset-bottom));
+            background: radial-gradient(ellipse at 50% -15%, rgba(16,185,129,.10), transparent 44%), var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 14px; line-height: 1.45; -webkit-font-smoothing: antialiased;
         }
-        /* Native App Top Bar */
+        button, input, select, textarea { font: inherit; }
+        button { cursor: pointer; touch-action: manipulation; }
+        input, textarea { user-select: text; -webkit-user-select: text; }
+        .app-shell { width: 100%; max-width: 720px; margin: 0 auto; }
         .app-bar {
             position: sticky; top: 0; z-index: 40;
-            background: rgba(11, 17, 30, 0.92); backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            min-height: 68px; padding: calc(10px + env(safe-area-inset-top)) 18px 11px;
+            background: rgba(11,17,30,.94); border-bottom: 1px solid var(--line-soft);
+            backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
         }
-        .app-title { font-size: 15px; font-weight: 700; letter-spacing: 0.8px; color: var(--text-main); }
-        .app-sub { font-size: 10.5px; color: var(--accent-soft); font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; }
+        .brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+        .brand-mark {
+            width: 39px; height: 39px; flex: 0 0 39px; display: grid; place-items: center;
+            border: 1px solid rgba(52,211,153,.38); border-radius: 13px;
+            background: linear-gradient(145deg, rgba(16,185,129,.22), rgba(16,185,129,.06));
+            color: var(--accent-2); font-size: 17px; font-weight: 800; letter-spacing: -.5px;
+        }
+        .app-title { font-size: 14px; font-weight: 750; letter-spacing: .45px; line-height: 1.2; }
+        .app-sub { margin-top: 4px; color: var(--accent-2); font-size: 9px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; }
         .sync-btn {
-            background: var(--bg-card); border: 1px solid var(--border); color: var(--text-sub);
-            padding: 7px 12px; border-radius: 8px; font-size: 11px; font-weight: 600;
+            min-height: 38px; display: inline-flex; align-items: center; gap: 7px;
+            padding: 0 12px; border: 1px solid var(--line); border-radius: 12px;
+            background: var(--surface); color: var(--text); font-size: 11px; font-weight: 700;
         }
-        .sync-btn:active { transform: scale(0.95); border-color: var(--accent); color: var(--accent); }
-
-        .page { padding: 16px; display: none; animation: fadeUp 0.2s ease-out; }
+        .sync-btn:active, .btn:active, .nav-item:active { transform: scale(.97); }
+        .page { display: none; padding: 22px 16px 18px; animation: enter .18s ease-out; }
         .page.active { display: block; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Stat Cards Grid */
-        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        @keyframes enter { from { opacity: .55; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+        .page-heading { margin: 1px 2px 18px; }
+        .eyebrow { color: var(--accent-2); font-size: 9px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; }
+        .page-title { margin: 5px 0 3px; font-size: 23px; line-height: 1.18; letter-spacing: -.65px; font-weight: 760; }
+        .page-desc { margin: 0; color: var(--sub); font-size: 12px; line-height: 1.55; }
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 13px; }
         .stat-pill {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px;
+            min-width: 0; padding: 15px; border: 1px solid var(--line-soft); border-radius: 16px;
+            background: linear-gradient(145deg, rgba(17,26,46,.98), rgba(14,23,40,.98));
         }
-        .stat-lbl { font-size: 10.5px; color: var(--text-sub); font-weight: 600; letter-spacing: 0.5px; }
-        .stat-num { font-size: 22px; font-weight: 700; color: var(--accent-soft); font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
-
-        /* Native Card */
+        .stat-lbl { color: var(--sub); font-size: 10px; font-weight: 700; letter-spacing: .35px; }
+        .stat-num { margin-top: 5px; color: var(--accent-2); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 25px; line-height: 1; font-weight: 750; font-variant-numeric: tabular-nums; }
         .card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 14px; padding: 18px; margin-bottom: 14px;
+            margin-bottom: 13px; padding: 17px; border: 1px solid var(--line-soft); border-radius: var(--radius);
+            background: linear-gradient(155deg, rgba(17,26,46,.98), rgba(14,23,40,.98));
+            box-shadow: 0 8px 24px rgba(0,0,0,.12);
         }
-        .card-head {
-            font-size: 12px; font-weight: 700; color: var(--accent-soft);
-            letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        label { display: block; font-size: 11px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px; letter-spacing: 0.4px; }
+        .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; color: var(--text); font-size: 13px; font-weight: 750; letter-spacing: -.1px; }
+        .card-head small { color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: 0; }
+        .card-note { margin: -6px 0 14px; color: var(--sub); font-size: 11px; line-height: 1.55; }
+        .field { min-width: 0; margin-bottom: 13px; }
+        .field:last-child { margin-bottom: 0; }
+        label { display: block; margin: 0 0 7px; color: #B4C1D3; font-size: 10px; font-weight: 750; letter-spacing: .45px; }
         input, select, textarea {
-            width: 100%; background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: 10px; padding: 12px 14px; color: var(--text-main);
-            font-size: 13.5px; margin-bottom: 12px; outline: none;
+            display: block; width: 100%; min-height: 46px; margin: 0;
+            padding: 12px 13px; outline: none; border: 1px solid var(--line); border-radius: 12px;
+            background: var(--input); color: var(--text); font-size: 14px; line-height: 1.35;
+            appearance: none; -webkit-appearance: none;
         }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
+        input::placeholder, textarea::placeholder { color: #627189; opacity: 1; }
+        input:focus, select:focus, textarea:focus { border-color: rgba(52,211,153,.8); box-shadow: 0 0 0 3px rgba(16,185,129,.10); }
+        textarea { min-height: 88px; resize: vertical; }
+        .mono, .key-code, .key-meta, #generatedKeysBox { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
         .btn {
-            width: 100%; background: var(--accent); color: #05140E; border: none;
-            border-radius: 10px; padding: 13px; font-size: 12.5px; font-weight: 700;
-            letter-spacing: 0.8px; text-transform: uppercase;
+            display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+            min-height: 46px; width: 100%; padding: 0 15px; border: 1px solid transparent; border-radius: 13px;
+            background: var(--accent); color: #041A12; font-size: 12px; font-weight: 800; letter-spacing: .15px;
+            transition: transform .12s ease, opacity .12s ease;
         }
-        .btn:active { transform: scale(0.98); opacity: 0.9; }
-        .btn-outline {
-            background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border);
-        }
-        .btn-sm {
-            width: auto; padding: 7px 11px; font-size: 11px; border-radius: 7px; font-weight: 600;
-        }
-        .btn-danger { background: rgba(244, 63, 94, 0.15); color: #FB7185; border: 1px solid rgba(244, 63, 94, 0.35); }
-        .btn-warn { background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.35); }
-        .btn-blue { background: rgba(56, 189, 248, 0.15); color: #7DD3FC; border: 1px solid rgba(56, 189, 248, 0.35); }
-
-        /* License Item Card */
-        .key-card {
-            background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: 12px; padding: 14px; margin-bottom: 10px;
-        }
-        .key-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .key-code { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--accent-soft); }
-        .badge {
-            font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
-            font-family: 'JetBrains Mono', monospace;
-        }
-        .b-active { background: rgba(16, 185, 129, 0.15); color: var(--accent-soft); }
-        .b-block { background: rgba(244, 63, 94, 0.15); color: #FB7185; }
-        .b-exp { background: rgba(245, 158, 11, 0.15); color: #FBBF24; }
-        .key-meta { font-size: 11.5px; color: var(--text-sub); line-height: 1.5; margin-bottom: 10px; font-family: 'JetBrains Mono', monospace; }
-        .action-bar { display: flex; gap: 6px; flex-wrap: wrap; }
-
-        /* Bottom Navigation Bar */
+        .btn:active { opacity: .9; }
+        .btn-outline { border-color: var(--line); background: #0B1321; color: var(--text); }
+        .btn-sm { width: auto; min-height: 34px; padding: 0 10px; border-radius: 10px; font-size: 10px; font-weight: 750; }
+        .btn-danger { border-color: rgba(244,63,94,.28); background: rgba(244,63,94,.10); color: #FDA4AF; }
+        .btn-warn { border-color: rgba(245,158,11,.28); background: rgba(245,158,11,.10); color: #FCD34D; }
+        .btn-blue { border-color: rgba(56,189,248,.28); background: rgba(56,189,248,.10); color: #7DD3FC; }
+        .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .btn-row .btn { flex: 1 1 130px; }
+        .key-card { margin-bottom: 10px; padding: 14px; border: 1px solid var(--line-soft); border-radius: 15px; background: #0C1524; }
+        .key-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
+        .key-code { min-width: 0; overflow-wrap: anywhere; color: var(--accent-2); font-size: 13px; font-weight: 800; }
+        .badge { flex: 0 0 auto; padding: 4px 8px; border-radius: 7px; font-size: 9px; line-height: 1.2; font-weight: 800; letter-spacing: .25px; }
+        .b-active { background: rgba(16,185,129,.13); color: var(--accent-2); }
+        .b-block { background: rgba(244,63,94,.13); color: #FDA4AF; }
+        .b-exp { background: rgba(245,158,11,.13); color: #FCD34D; }
+        .key-meta { margin-bottom: 11px; color: var(--sub); font-size: 10px; line-height: 1.7; overflow-wrap: anywhere; }
+        .action-bar { display: flex; flex-wrap: wrap; gap: 6px; }
+        .section-gap { height: 3px; }
+        .helper { margin-top: 6px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+        .control-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid var(--line-soft); }
+        .control-row:first-of-type { border-top: 0; padding-top: 0; }
+        .control-title { color: var(--text); font-size: 12px; font-weight: 700; }
+        .control-desc { margin-top: 3px; color: var(--sub); font-size: 10px; line-height: 1.45; }
+        .control-row select { width: 125px; min-width: 125px; min-height: 40px; padding: 8px 10px; font-size: 11px; }
+        .client-preview { padding: 14px; border: 1px solid rgba(16,185,129,.22); border-radius: 15px; background: rgba(7,11,20,.75); }
+        .preview-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; color: var(--accent-2); font-size: 10px; font-weight: 800; letter-spacing: .7px; }
+        .preview-state { color: var(--text); font-size: 12px; font-weight: 700; }
+        .preview-sub { margin-top: 4px; color: var(--sub); font-size: 10px; }
+        .preview-banner { margin-top: 10px; padding: 9px 10px; border: 1px solid rgba(245,158,11,.25); border-radius: 10px; background: rgba(245,158,11,.07); color: #FCD34D; font-size: 10px; line-height: 1.45; overflow-wrap: anywhere; }
+        .preview-banner.muted { border-color: var(--line-soft); background: transparent; color: var(--muted); }
         .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
-            background: rgba(11, 17, 30, 0.96); backdrop-filter: blur(12px);
-            border-top: 1px solid var(--border);
-            display: grid; grid-template-columns: repeat(4, 1fr); z-index: 50;
+            position: fixed; z-index: 50; left: 0; right: 0; bottom: 0;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
+            min-height: calc(67px + env(safe-area-inset-bottom)); padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+            border-top: 1px solid var(--line-soft); background: rgba(10,16,28,.97);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         }
-        .nav-item {
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            color: var(--text-sub); font-size: 10.5px; font-weight: 600; letter-spacing: 0.4px;
-        }
-        .nav-item.active { color: var(--accent-soft); }
-        .nav-dot { width: 18px; height: 3px; border-radius: 3px; background: transparent; margin-bottom: 5px; }
-        .nav-item.active .nav-dot { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-
-        /* Auth Lock Screen */
-        #authOverlay {
-            position: fixed; inset: 0; background: var(--bg-deep); z-index: 100;
-            display: flex; justify-content: center; align-items: center; padding: 24px;
-        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 0; border-radius: 12px; color: var(--muted); font-size: 9px; font-weight: 750; letter-spacing: .2px; transition: color .15s ease; }
+        .nav-item.active { color: var(--accent-2); background: rgba(16,185,129,.07); }
+        .nav-icon { display: grid; place-items: center; width: 23px; height: 22px; font-size: 17px; line-height: 1; }
         .hidden { display: none !important; }
+        #authOverlay {
+            position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
+            padding: 24px; background: rgba(7,11,20,.98); backdrop-filter: blur(18px);
+        }
+        .auth-card { width: 100%; max-width: 380px; padding: 24px 20px; text-align: center; border: 1px solid var(--line); border-radius: 22px; background: linear-gradient(150deg,#142038,#0D1728); box-shadow: 0 24px 70px rgba(0,0,0,.4); }
+        .auth-logo { width: 54px; height: 54px; display: grid; place-items: center; margin: 0 auto 14px; border: 1px solid rgba(52,211,153,.35); border-radius: 18px; background: rgba(16,185,129,.12); color: var(--accent-2); font-size: 23px; font-weight: 850; }
+        .auth-title { margin: 5px 0 17px; font-size: 19px; font-weight: 800; letter-spacing: -.35px; }
+        #masterPin { text-align: center; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: 1px; }
+        #authErr { min-height: 18px; margin-top: 10px; color: #FDA4AF; font-size: 11px; }
+        .sync-caption { margin-top: 12px; color: var(--muted); text-align: center; font-size: 9px; }
+        @media (min-width: 620px) {
+            .page { padding: 26px 24px 22px; }
+            .app-bar { padding-left: 24px; padding-right: 24px; }
+            .stats-row { gap: 13px; }
+            .card { padding: 20px; }
+        }
+        @media (max-width: 360px) {
+            .page { padding-left: 12px; padding-right: 12px; }
+            .card { padding: 14px; }
+            .control-row select { width: 112px; min-width: 112px; }
+            .nav-item { font-size: 8px; }
+        }
     </style>
 </head>
 <body>
-
-<!-- 1. MASTER PIN LOCK OVERLAY -->
-<div id="authOverlay">
-    <div class="card" style="width: 100%; max-width: 360px; text-align: center;">
-        <div class="app-sub" style="margin-bottom: 6px;">COMMAND AUTHENTICATION</div>
-        <div class="app-title" style="font-size: 19px; margin-bottom: 18px;">NAFSI ADMIN CONSOLE</div>
-        <input type="password" id="masterPin" placeholder="Enter Master Admin Key" style="text-align: center; font-family: 'JetBrains Mono', monospace;">
-        <button class="btn" onclick="unlockConsole()">UNLOCK CONSOLE</button>
-        <div id="authErr" style="color: var(--danger); font-size: 12px; margin-top: 10px;"></div>
+<div class="app-shell">
+    <div id="authOverlay">
+        <div class="auth-card">
+            <div class="auth-logo">N</div>
+            <div class="eyebrow">ADMIN AUTHENTICATION</div>
+            <div class="auth-title">Nafsi Control Center</div>
+            <div class="field"><input type="password" id="masterPin" placeholder="Enter admin passcode" autocomplete="current-password"></div>
+            <button class="btn" onclick="unlockConsole()">Unlock console</button>
+            <div id="authErr" role="alert"></div>
+            <div class="sync-caption">Private administrator workspace</div>
+        </div>
     </div>
+
+    <header class="app-bar">
+        <div class="brand">
+            <div class="brand-mark">N</div>
+            <div>
+                <div class="app-title">NAFSI COMMANDER</div>
+                <div class="app-sub" id="syncStatusText">CLOUD CONNECTION</div>
+            </div>
+        </div>
+        <button class="sync-btn" onclick="refreshAllData(true)" aria-label="Synchronize cloud data"><span>↻</span> Sync</button>
+    </header>
+
+    <main>
+        <section id="tabGenerate" class="page active">
+            <div class="page-heading">
+                <div class="eyebrow">LICENSE OPERATIONS</div>
+                <h1 class="page-title" id="activePageTitle">Generate keys</h1>
+                <p class="page-desc">Create access keys and define how many devices can activate each license.</p>
+            </div>
+            <div class="stats-row">
+                <div class="stat-pill"><div class="stat-lbl">TOTAL LICENSES</div><div class="stat-num" id="stTotalKeys">0</div></div>
+                <div class="stat-pill"><div class="stat-lbl">TRIAL DEVICES</div><div class="stat-num" id="stTotalTrials">0</div></div>
+            </div>
+            <div class="card">
+                <div class="card-head"><span>Create license keys</span><small>1–100 per batch</small></div>
+                <div class="grid-2">
+                    <div class="field"><label for="genQty">KEY QUANTITY</label><input type="number" id="genQty" value="1" min="1" max="100" inputmode="numeric"></div>
+                    <div class="field"><label for="genMaxDevices">DEVICE SLOTS</label><input type="number" id="genMaxDevices" value="1" min="1" max="500" inputmode="numeric"></div>
+                </div>
+                <div class="field"><label for="genPreset">LICENSE DURATION</label>
+                    <select id="genPreset" onchange="toggleCustomTime()">
+                        <option value="24">1 day</option><option value="168">7 days</option><option value="720">30 days</option><option value="custom">Custom duration</option>
+                    </select>
+                </div>
+                <div id="customTimeRow" class="grid-2 hidden">
+                    <div class="field"><label for="customTimeVal">TIME VALUE</label><input type="number" id="customTimeVal" value="30" min="1" inputmode="numeric"></div>
+                    <div class="field"><label for="customTimeUnit">TIME UNIT</label><select id="customTimeUnit"><option value="minutes">Minutes</option><option value="hours">Hours</option><option value="days">Days</option></select></div>
+                </div>
+                <div class="field"><label for="genOwner">OWNER / RESELLER NOTE</label><input type="text" id="genOwner" placeholder="Optional owner name"></div>
+                <button class="btn" onclick="generateKeysBatch()">＋ Generate and upload</button>
+            </div>
+            <div id="generatedResultCard" class="card hidden">
+                <div class="card-head"><span>Newly issued keys</span><button class="btn btn-sm btn-blue" onclick="copyGeneratedBatch()">Copy all</button></div>
+                <div id="generatedKeysBox" class="mono" style="font-size:12px;color:var(--accent-2);white-space:pre-wrap;overflow-wrap:anywhere;background:var(--input);padding:13px;border-radius:12px;border:1px solid var(--line);"></div>
+            </div>
+        </section>
+
+        <section id="tabKeys" class="page">
+            <div class="page-heading"><div class="eyebrow">ACCESS MANAGEMENT</div><h1 class="page-title">License keys</h1><p class="page-desc">Search, block, expire, reset device slots or remove a license.</p></div>
+            <div class="card" style="padding:12px;"><input type="search" id="searchKeyInput" placeholder="Search key, device ID or owner…" style="margin:0" oninput="renderKeysList()"></div>
+            <div id="keysContainer"></div>
+        </section>
+
+        <section id="tabConfig" class="page">
+            <div class="page-heading"><div class="eyebrow">REMOTE CLIENT SETTINGS</div><h1 class="page-title">Client controls</h1><p class="page-desc">These settings are read by the Android login dialog from Firebase <span class="mono">/config</span>.</p></div>
+
+            <div class="card">
+                <div class="card-head"><span>Access & availability</span><small>Live client behaviour</small></div>
+                <div class="control-row">
+                    <div><div class="control-title">5-minute free trial</div><div class="control-desc">Allow or disable new trial activations.</div></div>
+                    <select id="cfgTrialEnabled" aria-label="5-minute free trial"><option value="true">Enabled</option><option value="false">Disabled</option></select>
+                </div>
+                <div class="control-row">
+                    <div><div class="control-title">Maintenance mode</div><div class="control-desc">Replace the login form with a maintenance notice.</div></div>
+                    <select id="cfgMaintenance" aria-label="Maintenance mode"><option value="false">Offline</option><option value="true">Enabled</option></select>
+                </div>
+                <div class="field" style="margin-top:13px"><label for="cfgMaintenanceMessage">MAINTENANCE MESSAGE</label><textarea id="cfgMaintenanceMessage" placeholder="Explain why the service is unavailable…"></textarea><div class="helper">Shown in the client dialog while maintenance mode is enabled.</div></div>
+                <div class="field" style="margin-top:14px"><label for="cfgBroadcast">LIVE BROADCAST BANNER</label><textarea id="cfgBroadcast" placeholder="Leave empty to hide the client banner…"></textarea><div class="helper">A short message displayed above the login form. Empty text hides it.</div></div>
+                <button class="btn" onclick="saveRemoteConfig()">Save client settings</button>
+            </div>
+
+            <div class="card">
+                <div class="card-head"><span>Contact button</span><small>Client login dialog</small></div>
+                <div class="btn-row" style="margin-bottom:14px">
+                    <button class="btn btn-sm btn-outline" style="border-color:rgba(16,185,129,.45);color:var(--accent-2)" onclick="setContactPreset('WHATSAPP','https://wa.me/91')">WhatsApp preset</button>
+                    <button class="btn btn-sm btn-outline" style="border-color:rgba(56,189,248,.45);color:#7DD3FC" onclick="setContactPreset('TELEGRAM','https://t.me/')">Telegram preset</button>
+                </div>
+                <div class="field"><label for="cfgBuyText">BUTTON LABEL</label><input type="text" id="cfgBuyText" placeholder="e.g. Contact support"></div>
+                <div class="field"><label for="cfgBuyUrl">CONTACT / REDIRECT URL</label><input type="url" id="cfgBuyUrl" placeholder="https://wa.me/91XXXXXXXXXX"></div>
+                <div class="helper">The client detects WhatsApp / Telegram styling from the label or URL.</div>
+            </div>
+
+            <div class="card">
+                <div class="card-head"><span>App update control</span><small>Client update notice</small></div>
+                <div class="grid-2">
+                    <div class="field"><label for="cfgVerCode">VERSION CODE</label><input type="number" id="cfgVerCode" value="1" min="1" inputmode="numeric"></div>
+                    <div class="field"><label for="cfgVerName">VERSION NAME</label><input type="text" id="cfgVerName" value="1.0" placeholder="e.g. 2.1"></div>
+                </div>
+                <div class="control-row">
+                    <div><div class="control-title">Force client update</div><div class="control-desc">Hide the login form and show the update screen.</div></div>
+                    <select id="cfgForceUpdate" aria-label="Force client update"><option value="false">Disabled</option><option value="true">Enabled</option></select>
+                </div>
+                <div class="field" style="margin-top:13px"><label for="cfgChangelog">UPDATE NOTES / CHANGELOG</label><textarea id="cfgChangelog" placeholder="What changed in this release?" ></textarea></div>
+                <div class="field"><label for="cfgApkUrl">APK DOWNLOAD URL</label><input type="url" id="cfgApkUrl" placeholder="https://example.com/app.apk"></div>
+                <div class="helper">To activate forced update, set Version Code above 1 and enable the switch. Maintenance mode takes priority.</div>
+                <button class="btn" style="margin-top:14px" onclick="saveRemoteConfig()">Save update settings</button>
+            </div>
+
+            <div class="card">
+                <div class="card-head"><span>Client dialog preview</span><small>Local preview</small></div>
+                <div class="client-preview">
+                    <div class="preview-head"><span>NAFSI CLIENT ACCESS</span><span>●</span></div>
+                    <div class="preview-state" id="previewMode">Normal access</div>
+                    <div class="preview-sub" id="previewTrial">5-minute trial enabled</div>
+                    <div id="previewBroadcast" class="preview-banner muted">No broadcast message</div>
+                </div>
+                <div class="helper">Preview only. The actual dialog updates after it fetches the saved Firebase configuration.</div>
+            </div>
+
+            <div class="card">
+                <div class="card-head"><span>Admin panel update</span><small>WebView reload</small></div>
+                <p class="card-note">Reload the hosted panel after publishing a new index.html build.</p>
+                <button class="btn btn-outline" onclick="forceGithubReload()">↻ Pull latest panel</button>
+            </div>
+        </section>
+
+        <section id="tabHwid" class="page">
+            <div class="page-heading"><div class="eyebrow">DEVICE GOVERNANCE</div><h1 class="page-title">HWID guard</h1><p class="page-desc">Review trial devices and manage the global hardware-ID block list.</p></div>
+            <div class="card">
+                <div class="card-head"><span>Global HWID blacklist</span></div>
+                <div class="field"><label for="blkHwidInput">HARDWARE SIGNATURE</label><input type="text" id="blkHwidInput" class="mono" placeholder="NF-XXXX-XXXX" style="text-transform:uppercase"></div>
+                <button class="btn btn-danger" onclick="blacklistHwid()">Block device</button>
+                <div id="blacklistContainer" style="margin-top:13px"></div>
+            </div>
+            <div class="card">
+                <div class="card-head"><span>Claimed 5-minute trials</span></div>
+                <div id="trialsContainer"></div>
+            </div>
+        </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <div class="nav-item active" onclick="switchTab('tabGenerate', this)"><span class="nav-icon">＋</span><span class="nav-label">GENERATE</span></div>
+        <div class="nav-item" onclick="switchTab('tabKeys', this)"><span class="nav-icon">▤</span><span class="nav-label">LICENSES</span></div>
+        <div class="nav-item" onclick="switchTab('tabConfig', this)"><span class="nav-icon">⚙</span><span class="nav-label">CLIENT</span></div>
+        <div class="nav-item" onclick="switchTab('tabHwid', this)"><span class="nav-icon">⌁</span><span class="nav-label">DEVICES</span></div>
+    </nav>
 </div>
-
-<!-- TOP NATIVE APP BAR -->
-<div class="app-bar">
-    <div>
-        <div class="app-title">NAFSI COMMANDER</div>
-        <div class="app-sub" id="syncStatusText">CLOUD REALTIME CONNECTED</div>
-    </div>
-    <button class="sync-btn" onclick="refreshAllData(true)">SYNC NOW</button>
-</div>
-
-<!-- =========================================================
-     TAB 1: GENERATE KEYS (1-100 KEYS + 1-50+ DEVICE SLOTS)
-     ========================================================= -->
-<div id="tabGenerate" class="page active">
-    <div class="stats-row">
-        <div class="stat-pill">
-            <div class="stat-lbl">TOTAL LICENSES</div>
-            <div class="stat-num" id="stTotalKeys">0</div>
-        </div>
-        <div class="stat-pill">
-            <div class="stat-lbl">TRIAL HWIDS LOCKED</div>
-            <div class="stat-num" id="stTotalTrials">0</div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-head">
-            <span>CREATE LICENSE KEYS</span>
-            <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-sub);">1 TO 100 BATCH</span>
-        </div>
-
-        <div class="grid-2">
-            <div>
-                <label>KEY QUANTITY (1 - 100)</label>
-                <input type="number" id="genQty" value="1" min="1" max="100">
-            </div>
-            <div>
-                <label>DEVICE SLOTS (1 - 50+)</label>
-                <input type="number" id="genMaxDevices" value="1" min="1" max="500" placeholder="e.g. 1 or 50">
-            </div>
-        </div>
-
-        <label>DURATION PRESET OR CUSTOM TIME</label>
-        <select id="genPreset" onchange="toggleCustomTime()">
-            <option value="24">1 Day Standard (24 Hours)</option>
-            <option value="168">7 Days Weekly (168 Hours)</option>
-            <option value="720">30 Days Monthly (720 Hours)</option>
-            <option value="custom">Custom Duration (Minutes / Hours / Days)</option>
-        </select>
-
-        <div id="customTimeRow" class="grid-2 hidden">
-            <div>
-                <label>TIME VALUE</label>
-                <input type="number" id="customTimeVal" value="30" min="1">
-            </div>
-            <div>
-                <label>TIME UNIT</label>
-                <select id="customTimeUnit">
-                    <option value="minutes">Minutes</option>
-                    <option value="hours">Hours</option>
-                    <option value="days">Days</option>
-                </select>
-            </div>
-        </div>
-
-        <label>CUSTOM KEY PREFIX / OWNER NOTE (OPTIONAL)</label>
-        <input type="text" id="genOwner" placeholder="e.g. Reseller_Rahim or VIP_Client">
-
-        <button class="btn" onclick="generateKeysBatch()">GENERATE & UPLOAD TO SERVER</button>
-    </div>
-
-    <div id="generatedResultCard" class="card hidden">
-        <div class="card-head">
-            <span>NEWLY ISSUED KEYS</span>
-            <button class="btn btn-sm btn-blue" onclick="copyGeneratedBatch()">COPY ALL</button>
-        </div>
-        <div id="generatedKeysBox" style="font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--accent-soft); white-space:pre-wrap; background:var(--bg-input); padding:12px; border-radius:8px; border:1px solid var(--border);"></div>
-    </div>
-</div>
-
-<!-- =========================================================
-     TAB 2: MANAGE LICENSES (BLOCK, EXPIRE, SLOTS 1/50, DELETE)
-     ========================================================= -->
-<div id="tabKeys" class="page">
-    <div class="card" style="padding: 12px 14px;">
-        <input type="text" id="searchKeyInput" placeholder="Search by key, HWID, or owner..." style="margin-bottom:0;" oninput="renderKeysList()">
-    </div>
-    <div id="keysContainer"></div>
-</div>
-
-<!-- =========================================================
-     TAB 3: REMOTE APP CONFIG (WHATSAPP / TELEGRAM / UPDATE)
-     ========================================================= -->
-<div id="tabConfig" class="page">
-    <div class="card">
-        <div class="card-head">CLIENT BUY BUTTON CONTROLLER</div>
-        <label>QUICK PRESET</label>
-        <div class="grid-2" style="margin-bottom: 12px;">
-            <button class="btn btn-sm btn-outline" style="border-color:#10B981; color:#34D399;" onclick="setContactPreset('WHATSAPP', 'https://wa.me/91')">SET WHATSAPP</button>
-            <button class="btn btn-sm btn-outline" style="border-color:#38BDF8; color:#7DD3FC;" onclick="setContactPreset('TELEGRAM', 'https://t.me/')">SET TELEGRAM</button>
-        </div>
-
-        <label>BUTTON DISPLAY TEXT (SHOWN IN CLIENT APK)</label>
-        <input type="text" id="cfgBuyText" placeholder="WHATSAPP or TELEGRAM">
-
-        <label>TARGET CONTACT / REDIRECT URL</label>
-        <input type="text" id="cfgBuyUrl" placeholder="https://wa.me/91XXXXXXXXXX or https://t.me/username">
-
-        <label>LIVE BROADCAST BANNER NOTICE (LEAVE EMPTY TO HIDE)</label>
-        <input type="text" id="cfgBroadcast" placeholder="e.g. Server upgraded to v2.0!">
-
-        <div class="grid-2">
-            <div>
-                <label>5-MIN FREE TRIAL</label>
-                <select id="cfgTrialEnabled">
-                    <option value="true">ENABLED</option>
-                    <option value="false">DISABLED</option>
-                </select>
-            </div>
-            <div>
-                <label>MAINTENANCE LOCK</label>
-                <select id="cfgMaintenance">
-                    <option value="false">NORMAL (ONLINE)</option>
-                    <option value="true">MAINTENANCE LOCK</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="grid-2">
-            <div>
-                <label>APP VERSION CODE</label>
-                <input type="number" id="cfgVerCode" value="1" min="1">
-            </div>
-            <div>
-                <label>VERSION NAME</label>
-                <input type="text" id="cfgVerName" value="1.0">
-            </div>
-        </div>
-
-        <label>FORCE UPDATE APK DOWNLOAD LINK</label>
-        <input type="text" id="cfgApkUrl" placeholder="https://...">
-
-        <button class="btn" onclick="saveRemoteConfig()">SAVE LIVE CLIENT CONFIG</button>
-    </div>
-
-    <div class="card">
-        <div class="card-head">GITHUB / RENDER UI SYNC</div>
-        <p style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">If you pushed a new update to your GitHub repository, tap below to clear local cache and load the latest panel immediately.</p>
-        <button class="btn btn-outline" onclick="forceGithubReload()">PULL LATEST GITHUB UPDATE</button>
-    </div>
-</div>
-
-<!-- =========================================================
-     TAB 4: HWID GUARD (BLACKLIST & FREE TRIAL RESET)
-     ========================================================= -->
-<div id="tabHwid" class="page">
-    <div class="card">
-        <div class="card-head">GLOBAL HWID BLACKLIST</div>
-        <label>HARDWARE SIGNATURE (NF-XXXX-XXXX)</label>
-        <div style="display:flex; gap:8px;">
-            <input type="text" id="blkHwidInput" placeholder="NF-XXXX-XXXX" style="margin-bottom:0; font-family:'JetBrains Mono',monospace;">
-            <button class="btn btn-sm btn-danger" style="width:110px;" onclick="blacklistHwid()">BAN HWID</button>
-        </div>
-        <div id="blacklistContainer" style="margin-top:12px;"></div>
-    </div>
-
-    <div class="card">
-        <div class="card-head">CLAIMED 5-MIN FREE TRIALS</div>
-        <div id="trialsContainer"></div>
-    </div>
-</div>
-
-<!-- BOTTOM NATIVE NAVIGATION BAR -->
-<div class="bottom-nav">
-    <div class="nav-item active" onclick="switchTab('tabGenerate', this)">
-        <div class="nav-dot"></div>
-        <span>GENERATE</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('tabKeys', this)">
-        <div class="nav-dot"></div>
-        <span>LICENSES</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('tabConfig', this)">
-        <div class="nav-dot"></div>
-        <span>CONFIG</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('tabHwid', this)">
-        <div class="nav-dot"></div>
-        <span>HWID GUARD</span>
-    </div>
-</div>
-
 <script>
+
     const DB_URL = "https://nafsi-panel-web-app-default-rtdb.firebaseio.com";
     const MASTER_PIN = "NafisAdmin99";
     let cachedKeys = {};
@@ -372,6 +355,11 @@
             document.getElementById("authOverlay").classList.add("hidden");
             refreshAllData(false);
         }
+        ["cfgBroadcast", "cfgTrialEnabled", "cfgMaintenance", "cfgForceUpdate"].forEach(id => {
+            document.getElementById(id)?.addEventListener("input", updateClientPreview);
+            document.getElementById(id)?.addEventListener("change", updateClientPreview);
+        });
+        updateClientPreview();
     });
 
     function unlockConsole() {
@@ -392,6 +380,9 @@
         document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
         document.getElementById(tabId).classList.add("active");
         el.classList.add("active");
+        const label = el.querySelector(".nav-label");
+        const title = document.getElementById("activePageTitle");
+        if (label && title) title.textContent = label.textContent.trim();
     }
 
     function toggleCustomTime() {
@@ -616,29 +607,79 @@
         document.getElementById("cfgBroadcast").value = cfg.broadcastMessage || "";
         document.getElementById("cfgTrialEnabled").value = String(cfg.trialEnabled !== false);
         document.getElementById("cfgMaintenance").value = String(cfg.maintenance === true);
+        document.getElementById("cfgMaintenanceMessage").value = cfg.maintenanceMessage || "Server is currently undergoing scheduled maintenance by Admin.";
         document.getElementById("cfgVerCode").value = cfg.versionCode || 1;
         document.getElementById("cfgVerName").value = cfg.versionName || "1.0";
+        document.getElementById("cfgForceUpdate").value = String(cfg.forceUpdate !== undefined ? cfg.forceUpdate === true : Number(cfg.versionCode || 1) > 1);
+        document.getElementById("cfgChangelog").value = cfg.changelog || "";
         document.getElementById("cfgApkUrl").value = cfg.apkUrl || "";
+        updateClientPreview();
     }
 
     async function saveRemoteConfig() {
         tap();
+        const buyUrl = document.getElementById("cfgBuyUrl").value.trim();
+        const apkUrl = document.getElementById("cfgApkUrl").value.trim();
+        const versionCode = Math.max(1, parseInt(document.getElementById("cfgVerCode").value, 10) || 1);
+
+        const isHttpUrl = (value) => {
+            if (!value) return true;
+            try {
+                const u = new URL(value);
+                return u.protocol === "https:" || u.protocol === "http:";
+            } catch (_) { return false; }
+        };
+        if (!isHttpUrl(buyUrl) || !isHttpUrl(apkUrl)) {
+            toast("Enter a valid http/https link");
+            return;
+        }
+        if (document.getElementById("cfgForceUpdate").value === "true" && versionCode <= 1) {
+            toast("Set Version Code above 1 to activate forced update");
+            return;
+        }
+
         const cfgPayload = {
             buyButtonText: document.getElementById("cfgBuyText").value.trim(),
-            buyUrl: document.getElementById("cfgBuyUrl").value.trim(),
+            buyUrl,
             broadcastMessage: document.getElementById("cfgBroadcast").value.trim(),
             trialEnabled: document.getElementById("cfgTrialEnabled").value === "true",
             maintenance: document.getElementById("cfgMaintenance").value === "true",
-            versionCode: parseInt(document.getElementById("cfgVerCode").value) || 1,
+            maintenanceMessage: document.getElementById("cfgMaintenanceMessage").value.trim() || "Server is currently undergoing scheduled maintenance by Admin.",
+            versionCode,
             versionName: document.getElementById("cfgVerName").value.trim() || "1.0",
-            apkUrl: document.getElementById("cfgApkUrl").value.trim()
+            forceUpdate: document.getElementById("cfgForceUpdate").value === "true",
+            changelog: document.getElementById("cfgChangelog").value.trim(),
+            apkUrl
         };
 
-        await fetch(`${DB_URL}/config.json`, {
-            method: "PUT",
-            body: JSON.stringify(cfgPayload)
-        });
-        toast("Live Client Config Updated!");
+        try {
+            const response = await fetch(`${DB_URL}/config.json`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(cfgPayload)
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            updateClientPreview();
+            toast("Client settings saved to cloud");
+        } catch (error) {
+            toast("Save failed: check Firebase access");
+        }
+    }
+
+    function updateClientPreview() {
+        const broadcast = document.getElementById("cfgBroadcast")?.value.trim();
+        const trial = document.getElementById("cfgTrialEnabled")?.value === "true";
+        const maintenance = document.getElementById("cfgMaintenance")?.value === "true";
+        const forceUpdate = document.getElementById("cfgForceUpdate")?.value === "true";
+        const banner = document.getElementById("previewBroadcast");
+        const mode = document.getElementById("previewMode");
+        const trialState = document.getElementById("previewTrial");
+        if (banner) {
+            banner.textContent = broadcast || "No broadcast message";
+            banner.classList.toggle("muted", !broadcast);
+        }
+        if (mode) mode.textContent = maintenance ? "Maintenance" : (forceUpdate ? "Forced update" : "Normal access");
+        if (trialState) trialState.textContent = trial ? "5-minute trial enabled" : "5-minute trial disabled";
     }
 
     // 4. HWID GUARD & TRIAL MANAGEMENT
@@ -712,6 +753,7 @@
             location.reload();
         }
     }
+
 </script>
 </body>
 </html>
