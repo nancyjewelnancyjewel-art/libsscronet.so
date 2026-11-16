@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Rex Admin Console</title>
+<style>
+    :root {
+        --bg: #E8EEF5;
+        --surface: #FFFFFF;
+        --surface-sub: #F4F7FB;
+        --primary: #4F46E5;
+        --primary-dark: #3730A3;
+        --primary-soft: #EEF2FF;
+        --primary-border: #C7D2FE;
+        --text-main: #0F172A;
+        --text-secondary: #334155;
+        --text-muted: #64748B;
+        --border-strong: #CBD5E1;
+        --border-soft: #E2E8F0;
+        --emerald: #059669;
+        --emerald-bg: #D1FAE5;
+        --rose: #E11D48;
+        --rose-bg: #FFE4E6;
+        --amber: #D97706;
+        --amber-bg: #FEF3C7;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    input, textarea, select {
+        -webkit-user-select: text;
+        user-select: text;
+    }
+
+    body {
+        background-color: var(--bg);
+        color: var(--text-main);
+        padding-bottom: 84px;
+        overflow-x: hidden;
+    }
+
+    /* =====================================================================
+       TOP APP HEADER & KPI METRICS SECTION
+       ===================================================================== */
+    .app-header {
+        background: linear-gradient(135deg, #1E1B4B 0%, #312E81 100%);
+        color: #FFFFFF;
+        padding: 16px 16px 18px 16px;
+        border-bottom-left-radius: 22px;
+        border-bottom-right-radius: 22px;
+        box-shadow: 0 6px 20px rgba(30, 27, 75, 0.22);
+        position: sticky;
+        top: 0;
+        z-index: 95;
+    }
+
+    .brand-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+
+    .brand-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .brand-logo {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .brand-title {
+        font-size: 17px;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+    }
+
+    .brand-sub {
+        font-size: 11px;
+        font-weight: 600;
+        color: #A5B4FC;
+        letter-spacing: 0.4px;
+    }
+
+    .status-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        background: rgba(16, 185, 129, 0.2);
+        border: 1px solid rgba(16, 185, 129, 0.45);
+        color: #6EE7B7;
+    }
+
+    .status-badge.offline {
+        background: rgba(244, 63, 94, 0.22);
+        border-color: rgba(244, 63, 94, 0.5);
+        color: #FDA4AF;
+    }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+
+    .kpi-box {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 12px;
+        padding: 8px 6px;
+        text-align: center;
+    }
+
+    .kpi-val {
+        font-size: 18px;
+        font-weight: 800;
+        color: #FFFFFF;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .kpi-lbl {
+        font-size: 10.5px;
+        font-weight: 700;
+        color: #C7D2FE;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 2px;
+    }
+
+    /* =====================================================================
+       SECTION CONTAINERS & TYPOGRAPHY SYSTEM
+       ===================================================================== */
+    .page-view {
+        display: none;
+        padding: 16px 14px;
+        animation: fadeIn 0.16s ease-out;
+    }
+
+    .page-view.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .sec-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 4px 4px 10px 4px;
+    }
+
+    .sec-tag {
+        font-size: 11.5px;
+        font-weight: 800;
+        color: var(--primary-dark);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    .sec-hint {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: var(--text-muted);
+    }
+
+    .pro-card {
+        background: var(--surface);
+        border: 1.5px solid var(--border-strong);
+        border-radius: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+    }
+
+    .card-head {
+        background: var(--surface-sub);
+        border-bottom: 1px solid var(--border-soft);
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-head-title {
+        font-size: 14.5px;
+        font-weight: 800;
+        color: var(--text-main);
+        letter-spacing: -0.2px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .card-body {
+        padding: 16px;
+    }
+
+    .seg-bar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        background: var(--surface-sub);
+        border: 1px solid var(--border-strong);
+        border-radius: 11px;
+        padding: 3px;
+        margin-bottom: 14px;
+    }
+
+    .seg-btn {
+        text-align: center;
+        padding: 8px 4px;
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--text-muted);
+        border-radius: 8px;
+        transition: 0.15s;
+    }
+
+    .seg-btn.active {
+        background: var(--primary);
+        color: #FFFFFF;
+        box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+    }
+
+    .field-group {
+        margin-bottom: 13px;
+    }
+
+    .field-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 6px;
+    }
+
+    .pro-input, .pro-select, .pro-textarea {
+        width: 100%;
+        background: var(--surface-sub);
+        border: 1.5px solid var(--border-strong);
+        border-radius: 11px;
+        padding: 11px 13px;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-main);
+        outline: none;
+        transition: all 0.15s ease;
+    }
+
+    .pro-input:focus, .pro-select:focus, .pro-textarea:focus {
+        background: #FFFFFF;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .toggle-box {
+        background: var(--surface-sub);
+        border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        padding: 11px 13px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .t-title {
+        font-size: 13.5px;
+        font-weight: 800;
+        color: var(--text-main);
+    }
+
+    .t-desc {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    .sw-track {
+        width: 46px;
+        height: 26px;
+        background: #94A3B8;
+        border-radius: 20px;
+        position: relative;
+        transition: 0.2s;
+        flex-shrink: 0;
+    }
+
+    .sw-track::after {
+        content: "";
+        width: 20px;
+        height: 20px;
+        background: #FFFFFF;
+        border-radius: 50%;
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        transition: 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+
+    .sw-track.on {
+        background: var(--primary);
+    }
+
+    .sw-track.on::after {
+        left: 23px;
+    }
+
+    .btn-main {
+        width: 100%;
+        background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+        color: #FFFFFF;
+        border: none;
+        border-radius: 11px;
+        height: 46px;
+        font-size: 13.5px;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.28);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-main:active {
+        transform: scale(0.98);
+    }
+
+    .btn-sub {
+        width: 100%;
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        border: 1px solid var(--primary-border);
+        border-radius: 11px;
+        height: 42px;
+        font-size: 13px;
+        font-weight: 800;
+        margin-top: 8px;
+    }
+
+    .output-box {
+        background: #0F172A;
+        color: #E2E8F0;
+        border-radius: 11px;
+        padding: 12px;
+        font-family: monospace;
+        font-size: 13.5px;
+        font-weight: 700;
+        max-height: 150px;
+        overflow-y: auto;
+        margin-top: 12px;
+        display: none;
+        line-height: 1.6;
+    }
+
+    /* =====================================================================
+       LICENSE KEY CARDS & FILTER PILLS
+       ===================================================================== */
+    .filter-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+
+    .f-pill {
+        background: var(--surface);
+        border: 1.5px solid var(--border-strong);
+        border-radius: 10px;
+        padding: 8px 4px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--text-secondary);
+    }
+
+    .f-pill.active {
+        background: var(--text-main);
+        border-color: var(--text-main);
+        color: #FFFFFF;
+    }
+
+    .lic-card {
+        background: var(--surface);
+        border: 1.5px solid var(--border-strong);
+        border-radius: 15px;
+        padding: 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 3px 8px rgba(15, 23, 42, 0.05);
+    }
+
+    .lic-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-soft);
+        margin-bottom: 10px;
+    }
+
+    .lic-code {
+        font-family: monospace;
+        font-size: 15.5px;
+        font-weight: 800;
+        color: var(--text-main);
+        letter-spacing: 0.3px;
+    }
+
+    .lic-badge {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
+    .lic-badge.active { background: var(--emerald-bg); color: var(--emerald); }
+    .lic-badge.unused { background: var(--primary-soft); color: var(--primary-dark); }
+    .lic-badge.blocked { background: var(--rose-bg); color: var(--rose); }
+    .lic-badge.expired { background: var(--amber-bg); color: var(--amber); }
+
+    .lic-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        background: var(--surface-sub);
+        border: 1px solid var(--border-soft);
+        border-radius: 10px;
+        padding: 9px 11px;
+        margin-bottom: 10px;
+    }
+
+    .info-cell-lbl {
+        font-size: 10.5px;
+        font-weight: 800;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+
+    .info-cell-val {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .lic-actions {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+    }
+
+    .act-btn {
+        border: 1px solid var(--border-strong);
+        background: var(--surface);
+        color: var(--text-secondary);
+        border-radius: 8px;
+        height: 34px;
+        font-size: 11.5px;
+        font-weight: 800;
+    }
+
+    .act-btn:active { transform: scale(0.95); }
+    .act-btn.pri { background: var(--primary-soft); border-color: var(--primary-border); color: var(--primary-dark); }
+    .act-btn.warn { background: var(--amber-bg); border-color: #FDE68A; color: var(--amber); }
+    .act-btn.dan { background: var(--rose-bg); border-color: #FECDD3; color: var(--rose); }
+
+    /* =====================================================================
+       BOTTOM NAVIGATION BAR (PURE SVG VECTOR ICONS)
+       ===================================================================== */
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 68px;
+        background: #FFFFFF;
+        border-top: 1.5px solid var(--border-strong);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        padding: 6px 10px;
+        z-index: 100;
+        box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.06);
+    }
+
+    .b-tab {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        color: var(--text-muted);
+        font-size: 11px;
+        font-weight: 800;
+        gap: 4px;
+        transition: 0.15s;
+    }
+
+    .b-tab svg {
+        width: 20px;
+        height: 20px;
+        stroke: currentColor;
+        stroke-width: 2.2;
+        fill: none;
+    }
+
+    .b-tab.active {
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+    }
+
+    .toast-pop {
+        position: fixed;
+        bottom: 82px;
+        left: 50%;
+        transform: translateX(-50%) translateY(12px);
+        background: #0F172A;
+        color: #FFFFFF;
+        padding: 10px 22px;
+        border-radius: 24px;
+        font-size: 13px;
+        font-weight: 800;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.2s;
+        z-index: 9999;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.35);
+    }
+
+    .toast-pop.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+</style>
+</head>
+<body oncontextmenu="return false;">
+
+<!-- TOP HEADER & KPI METRICS -->
+<div class="app-header">
+    <div class="brand-bar">
+        <div class="brand-left">
+            <div class="brand-logo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+            </div>
+            <div>
+                <div class="brand-title">REX CONSOLE</div>
+                <div class="brand-sub" id="sync-sub">NODE: /licenses</div>
+            </div>
+        </div>
+        <div class="status-badge" id="conn-badge" onclick="syncDatabase()">
+            <span class="status-dot"></span>
+            <span id="conn-text">ONLINE</span>
+        </div>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi-box">
+            <div class="kpi-val" id="kpi-total">0</div>
+            <div class="kpi-lbl">Total</div>
+        </div>
+        <div class="kpi-box">
+            <div class="kpi-val" id="kpi-active" style="color:#6EE7B7">0</div>
+            <div class="kpi-lbl">Active</div>
+        </div>
+        <div class="kpi-box">
+            <div class="kpi-val" id="kpi-unused" style="color:#93C5FD">0</div>
+            <div class="kpi-lbl">Unused</div>
+        </div>
+        <div class="kpi-box">
+            <div class="kpi-val" id="kpi-blocked" style="color:#FDA4AF">0</div>
+            <div class="kpi-lbl">Blocked</div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================================= -->
+<!-- SECTION 1: CREATE LICENSE KEYS                                          -->
+<!-- ======================================================================= -->
+<div class="page-view active" id="view-create">
+    <div class="sec-header">
+        <span class="sec-tag">Section 01 • Key Generator</span>
+        <span class="sec-hint">Instant Cloud Sync</span>
+    </div>
+
+    <div class="pro-card">
+        <div class="card-head">
+            <div class="card-head-title">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2.4"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                <span>License Configuration</span>
+            </div>
+            <span style="font-size:11.5px;font-weight:800;color:var(--primary);cursor:pointer;" onclick="generateRandomSample()">AUTO FILL</span>
+        </div>
+
+        <div class="card-body">
+            <!-- Mode Selector -->
+            <div class="seg-bar">
+                <div class="seg-btn active" id="mode-single" onclick="setGenMode('single')">Single Key</div>
+                <div class="seg-btn" id="mode-custom" onclick="setGenMode('custom')">Custom Key</div>
+                <div class="seg-btn" id="mode-bulk" onclick="setGenMode('bulk')">Bulk Keys</div>
+            </div>
+
+            <div class="grid-2">
+                <div class="field-group">
+                    <div class="field-label"><span>Duration</span></div>
+                    <select class="pro-select" id="inp-hours">
+                        <option value="2">2 Hours</option>
+                        <option value="12">12 Hours</option>
+                        <option value="24">1 Day (24h)</option>
+                        <option value="168">7 Days</option>
+                        <option value="360">15 Days</option>
+                        <option value="720" selected>30 Days</option>
+                        <option value="2160">90 Days</option>
+                        <option value="8760">365 Days</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <div class="field-label"><span>Max Devices</span></div>
+                    <input type="number" class="pro-input" id="inp-maxdev" value="1" min="1" max="10">
+                </div>
+            </div>
+
+            <div class="field-group" id="wrap-custom" style="display:none;">
+                <div class="field-label"><span>Custom Key String</span><span>Required</span></div>
+                <input type="text" class="pro-input" id="inp-custom" placeholder="Enter exact key (e.g. REX-VIP-2026)">
+            </div>
+
+            <div class="field-group" id="wrap-prefix">
+                <div class="field-label"><span>Key Prefix</span><span>Optional</span></div>
+                <input type="text" class="pro-input" id="inp-prefix" value="VIP" placeholder="e.g. VIP or REX">
+            </div>
+
+            <div class="field-group" id="wrap-qty" style="display:none;">
+                <div class="field-label"><span>Bulk Quantity</span><span>Max 100</span></div>
+                <input type="number" class="pro-input" id="inp-qty" value="10" min="2" max="100">
+            </div>
+
+            <div class="toggle-box" onclick="toggleSwitch('sw-first-login')">
+                <div>
+                    <div class="t-title">Activation-Based Expiry</div>
+                    <div class="t-desc">Timer starts only when user logs in on device</div>
+                </div>
+                <div class="sw-track on" id="sw-first-login"></div>
+            </div>
+
+            <button class="btn-main" onclick="createLicensesNow()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Generate & Save License</span>
+            </button>
+
+            <div class="output-box" id="gen-output"></div>
+            <button class="btn-sub" id="btn-copy-last" style="display:none;" onclick="copyLastGenerated()">COPY GENERATED KEYS</button>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================================= -->
+<!-- SECTION 2: MANAGE LICENSE KEYS                                          -->
+<!-- ======================================================================= -->
+<div class="page-view" id="view-keys">
+    <div class="sec-header">
+        <span class="sec-tag">Section 02 • License Directory</span>
+        <span class="sec-hint" id="list-counter">0 Keys</span>
+    </div>
+
+    <div class="filter-strip">
+        <div class="f-pill active" id="flt-ALL" onclick="setKeyFilter('ALL')">All</div>
+        <div class="f-pill" id="flt-ACTIVE" onclick="setKeyFilter('ACTIVE')">Active</div>
+        <div class="f-pill" id="flt-UNUSED" onclick="setKeyFilter('UNUSED')">Unused</div>
+        <div class="f-pill" id="flt-BLOCKED" onclick="setKeyFilter('BLOCKED')">Blocked</div>
+    </div>
+
+    <div class="field-group">
+        <input type="text" class="pro-input" id="inp-search" style="background:#FFFFFF;" placeholder="Search by key, device model or brand..." oninput="renderKeyCards()">
+    </div>
+
+    <div id="key-list-container"></div>
+</div>
+
+<!-- ======================================================================= -->
+<!-- SECTION 3: CLIENT DIALOG & TRIAL CONFIGURATION                          -->
+<!-- ======================================================================= -->
+<div class="page-view" id="view-dialog">
+    <div class="sec-header">
+        <span class="sec-tag">Section 03 • Remote UI & Trial</span>
+        <span class="sec-hint">Real-Time Sync</span>
+    </div>
+
+    <!-- Subsection A: Hidden Trial Button Control -->
+    <div class="pro-card">
+        <div class="card-head">
+            <div class="card-head-title">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Online Free Trial Control</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="toggle-box" onclick="toggleSwitch('sw-trial')">
+                <div>
+                    <div class="t-title">Show Trial Button in Client</div>
+                    <div class="t-desc">Hidden from users when turned OFF</div>
+                </div>
+                <div class="sw-track" id="sw-trial"></div>
+            </div>
+
+            <div class="field-group" style="margin-bottom:0;">
+                <div class="field-label"><span>Trial Button Label</span></div>
+                <input type="text" class="pro-input" id="dlg-trial-txt" value="START FREE TRIAL">
+            </div>
+        </div>
+    </div>
+
+    <!-- Subsection B: Client Dialog Texts -->
+    <div class="pro-card">
+        <div class="card-head">
+            <div class="card-head-title">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2.4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>Dialog Branding & Texts</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="grid-2">
+                <div class="field-group">
+                    <div class="field-label"><span>Header Title</span></div>
+                    <input type="text" class="pro-input" id="dlg-htitle" placeholder="REX VIP 2.0">
+                </div>
+                <div class="field-group">
+                    <div class="field-label"><span>Header Status</span></div>
+                    <input type="text" class="pro-input" id="dlg-hsub" placeholder="● v1.0 • PROTECTED">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <div class="field-label"><span>Dialog Main Heading</span></div>
+                <input type="text" class="pro-input" id="dlg-title" placeholder="VIP License Authentication">
+            </div>
+
+            <div class="field-group">
+                <div class="field-label"><span>Announcement / Notice Box</span></div>
+                <textarea class="pro-textarea" id="dlg-msg" rows="3" placeholder="Enter your license key below..."></textarea>
+            </div>
+
+            <div class="grid-2">
+                <div class="field-group">
+                    <div class="field-label"><span>Left Button</span></div>
+                    <input type="text" class="pro-input" id="dlg-buytxt" placeholder="GET KEY">
+                </div>
+                <div class="field-group">
+                    <div class="field-label"><span>Right Button</span></div>
+                    <input type="text" class="pro-input" id="dlg-oktxt" placeholder="LOGIN">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="field-group">
+                    <div class="field-label"><span>Input Hint</span></div>
+                    <input type="text" class="pro-input" id="dlg-hint" placeholder="XXXX-XXXX-XXXX">
+                </div>
+                <div class="field-group">
+                    <div class="field-label"><span>Telegram URL</span></div>
+                    <input type="text" class="pro-input" id="dlg-tg" placeholder="https://t.me/RevNISH">
+                </div>
+            </div>
+
+            <button class="btn-main" onclick="saveDialogConfig()">Save Dialog Configuration</button>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================================= -->
+<!-- SECTION 4: SYSTEM, FORCE UPDATE & TRIAL DEVICES                         -->
+<!-- ======================================================================= -->
+<div class="page-view" id="view-system">
+    <div class="sec-header">
+        <span class="sec-tag">Section 04 • Update & Database</span>
+        <span class="sec-hint">System Control</span>
+    </div>
+
+    <!-- Subsection A: In-App Force Update -->
+    <div class="pro-card">
+        <div class="card-head">
+            <div class="card-head-title">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2.4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>In-App APK Force Updater</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="toggle-box" onclick="toggleSwitch('sw-update')">
+                <div>
+                    <div class="t-title">Enable Force Update Mode</div>
+                    <div class="t-desc">Downloads & installs APK inside client app</div>
+                </div>
+                <div class="sw-track" id="sw-update"></div>
+            </div>
+
+            <div class="grid-2">
+                <div class="field-group">
+                    <div class="field-label"><span>Target Version Code</span></div>
+                    <input type="number" class="pro-input" id="upd-code" value="1">
+                </div>
+                <div class="field-group">
+                    <div class="field-label"><span>Version Name</span></div>
+                    <input type="text" class="pro-input" id="upd-name" value="2.0">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <div class="field-label"><span>Direct APK Download URL</span></div>
+                <input type="text" class="pro-input" id="upd-apk" placeholder="https://example.com/update.apk">
+            </div>
+
+            <div class="field-group">
+                <div class="field-label"><span>Update Notice</span></div>
+                <input type="text" class="pro-input" id="upd-msg" value="A new security update is available. Click Update Now.">
+            </div>
+
+            <div class="toggle-box" onclick="toggleSwitch('sw-maint')">
+                <div>
+                    <div class="t-title">Server Maintenance Lock</div>
+                    <div class="t-desc">Pause all logins with maintenance message</div>
+                </div>
+                <div class="sw-track" id="sw-maint"></div>
+            </div>
+
+            <div class="field-group">
+                <div class="field-label"><span>Maintenance Message</span></div>
+                <input type="text" class="pro-input" id="upd-maint-msg" value="Server is under maintenance. Please wait.">
+            </div>
+
+            <button class="btn-main" onclick="saveDialogConfig()">Update System Settings</button>
+        </div>
+    </div>
+
+    <!-- Subsection B: Database Endpoint -->
+    <div class="pro-card">
+        <div class="card-head">
+            <div class="card-head-title">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2.4"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                <span>Firebase Database & Node</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="field-group">
+                <div class="field-label"><span>Database URL</span></div>
+                <input type="text" class="pro-input" id="cfg-url" value="https://liiiiiil-default-rtdb.firebaseio.com">
+            </div>
+            <div class="field-group">
+                <div class="field-label"><span>Root Authorised Node (Matches Rules)</span></div>
+                <input type="text" class="pro-input" id="cfg-root" value="licenses">
+            </div>
+            <button class="btn-main" onclick="saveDbSettings()">Connect & Sync Now</button>
+        </div>
+    </div>
+
+    <!-- Subsection C: Trial Devices -->
+    <div class="sec-header">
+        <span class="sec-tag">Registered Trial Hardware</span>
+        <span class="sec-hint" id="trial-counter">0 Devices</span>
+    </div>
+    <div id="trial-list-container"></div>
+</div>
+
+<!-- BOTTOM NAVIGATION BAR (VECTOR ICONS) -->
+<div class="bottom-bar">
+    <div class="b-tab active" id="tab-create" onclick="openSection('create')">
+        <svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+        <span>Create</span>
+    </div>
+    <div class="b-tab" id="tab-keys" onclick="openSection('keys')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="17" y2="13"/><line x1="7" y1="17" x2="12" y2="17"/></svg>
+        <span>Keys</span>
+    </div>
+    <div class="b-tab" id="tab-dialog" onclick="openSection('dialog')">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span>Dialog</span>
+    </div>
+    <div class="b-tab" id="tab-system" onclick="openSection('system')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>System</span>
+    </div>
+</div>
+
+<div class="toast-pop" id="toast">Saved</div>
+
+<script>
+    // =========================================================================
+    // Firebase Data Initialisation & Sync Logic
+    // =========================================================================
+    let dbUrl = (localStorage.getItem('rex_db_url') || 'https://liiiiiil-default-rtdb.firebaseio.com').replace(/\/+$/, '');
+    let rootNode = (localStorage.getItem('rex_root_node') || 'licenses').replace(/^\/+|\/+$/g, '');
+
+    let keysMap = {};
+    let dialogMap = {};
+    let trialsMap = {};
+    let genMode = 'single';
+    let keyFilter = 'ALL';
+    let lastGeneratedList = [];
+
+    function notify(msg) {
+        const el = document.getElementById('toast');
+        el.innerText = msg;
+        el.classList.add('show');
+        clearTimeout(window.tTimer);
+        window.tTimer = setTimeout(() => el.classList.remove('show'), 1900);
+    }
+
+    function openSection(name) {
+        ['create', 'keys', 'dialog', 'system'].forEach(s => {
+            document.getElementById('view-' + s).classList.toggle('active', s === name);
+            document.getElementById('tab-' + s).classList.toggle('active', s === name);
+        });
+        window.scrollTo(0, 0);
+    }
+
+    function handleBack() {
+        openSection('create');
+    }
+
+    function toggleSwitch(id) {
+        document.getElementById(id).classList.toggle('on');
+    }
+
+    function setGenMode(mode) {
+        genMode = mode;
+        ['single', 'custom', 'bulk'].forEach(m => {
+            document.getElementById('mode-' + m).classList.toggle('active', m === mode);
+        });
+        document.getElementById('wrap-custom').style.display = (mode === 'custom') ? 'block' : 'none';
+        document.getElementById('wrap-prefix').style.display = (mode === 'custom') ? 'none' : 'block';
+        document.getElementById('wrap-qty').style.display = (mode === 'bulk') ? 'block' : 'none';
+    }
+
+    function buildPath(subPath) {
+        return rootNode ? `${dbUrl}/${rootNode}/${subPath}.json` : `${dbUrl}/${subPath}.json`;
+    }
+
+    async function fbRequest(subPath, method, bodyObj) {
+        const url = buildPath(subPath);
+        const options = {
+            method: (method === 'PATCH') ? 'POST' : method,
+            headers: { 'Content-Type': 'application/json' }
+        };
+        if (method === 'PATCH') {
+            options.headers['X-HTTP-Method-Override'] = 'PATCH';
+        }
+        if (bodyObj !== null && bodyObj !== undefined) {
+            options.body = JSON.stringify(bodyObj);
+        }
+        const res = await fetch(url, options);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+    }
+
+    // =========================================================================
+    // New Instant Sync Logic (No loading time for users)
+    // =========================================================================
+    async function syncDatabase() {
+        document.getElementById('cfg-url').value = dbUrl;
+        document.getElementById('cfg-root').value = rootNode;
+        document.getElementById('sync-sub').innerText = `NODE: /${rootNode || 'root'}`;
+
+        // 1. Instant Load from Cache
+        const cachedSnap = localStorage.getItem('rex_instant_snap');
+        if (cachedSnap) {
+            try {
+                const parsed = JSON.parse(cachedSnap);
+                keysMap = parsed.Keys || {};
+                dialogMap = parsed.Dialog || {};
+                trialsMap = parsed.Trials || parsed.AnonymousUsers || {};
+                renderKeyCards();
+                populateDialogFields();
+                renderTrialDevices();
+            } catch (e) {}
+        }
+
+        const badge = document.getElementById('conn-badge');
+        const txt = document.getElementById('conn-text');
+
+        // 2. Silent Background Sync
+        try {
+            const rootUrl = rootNode ? `${dbUrl}/${rootNode}.json?t=${Date.now()}` : `${dbUrl}/.json?t=${Date.now()}`;
+            const res = await fetch(rootUrl);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+
+            const fullData = (await res.json()) || {};
+            localStorage.setItem('rex_instant_snap', JSON.stringify(fullData));
+
+            keysMap = fullData.Keys || {};
+            dialogMap = fullData.Dialog || {};
+            trialsMap = fullData.Trials || fullData.AnonymousUsers || {};
+
+            badge.classList.remove('offline');
+            txt.innerText = 'ONLINE';
+
+            renderKeyCards();
+            populateDialogFields();
+            renderTrialDevices();
+        } catch (err) {
+            badge.classList.add('offline');
+            txt.innerText = 'OFFLINE';
+        }
+    }
+
+    function saveDbSettings() {
+        const u = document.getElementById('cfg-url').value.trim().replace(/\/+$/, '');
+        const r = document.getElementById('cfg-root').value.trim().replace(/^\/+|\/+$/g, '');
+        if (!u.startsWith('http')) { notify('Invalid Firebase URL'); return; }
+        dbUrl = u;
+        rootNode = r;
+        localStorage.setItem('rex_db_url', dbUrl);
+        localStorage.setItem('rex_root_node', rootNode);
+        notify('Database Configuration Saved');
+        syncDatabase();
+    }
+
+    // =========================================================================
+    // SECTION 1: KEY GENERATOR
+    // =========================================================================
+    function randomChars(len) {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let out = '';
+        for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
+        return out;
+    }
+
+    function generateRandomSample() {
+        if (genMode === 'custom') {
+            document.getElementById('inp-custom').value = `REX-${randomChars(4)}-${randomChars(4)}`;
+        } else {
+            const prefixes = ['VIP', 'REX', 'PRO', 'MAX'];
+            document.getElementById('inp-prefix').value = prefixes[Math.floor(Math.random() * prefixes.length)];
+        }
+    }
+
+    function formatDateAfterHours(hours) {
+        const d = new Date(Date.now() + hours * 3600000);
+        const pad = n => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    async function createLicensesNow() {
+        const hours = parseInt(document.getElementById('inp-hours').value || '720');
+        const maxDev = Math.max(1, parseInt(document.getElementById('inp-maxdev').value || '1'));
+        const startOnLogin = document.getElementById('sw-first-login').classList.contains('on');
+        const prefix = document.getElementById('inp-prefix').value.trim().toUpperCase().replace(/[.#$\[\]\/]/g, '');
+
+        let count = 1;
+        if (genMode === 'bulk') {
+            count = Math.min(100, Math.max(2, parseInt(document.getElementById('inp-qty').value || '10')));
+        }
+
+        const batchPayload = {};
+        lastGeneratedList = [];
+
+        for (let i = 0; i < count; i++) {
+            let keyId = '';
+            if (genMode === 'custom') {
+                const rawCustom = document.getElementById('inp-custom').value.trim().replace(/[.#$\[\]\/]/g, '-');
+                if (!rawCustom) { notify('Enter a custom key string'); return; }
+                keyId = rawCustom;
+            } else {
+                keyId = prefix ? `${prefix}-${randomChars(4)}-${randomChars(4)}` : `${randomChars(4)}-${randomChars(4)}-${randomChars(4)}`;
+            }
+
+            const expStr = startOnLogin ? 'Not Activated' : formatDateAfterHours(hours);
+            const record = {
+                Status: 'Inactive',
+                Blocked: false,
+                Devices: `0 / ${maxDev}`,
+                MaxDevices: maxDev,
+                Device: '',
+                Brand: '',
+                Model: '',
+                Android: '',
+                Expiry: expStr,
+                DurationHours: hours,
+                LastLogin: ''
+            };
+
+            batchPayload[keyId] = record;
+            keysMap[keyId] = record;
+            lastGeneratedList.push(keyId);
+        }
+
+        try {
+            await fbRequest('Keys', 'PATCH', batchPayload);
+            const outBox = document.getElementById('gen-output');
+            outBox.style.display = 'block';
+            outBox.innerText = lastGeneratedList.join('\n');
+            document.getElementById('btn-copy-last').style.display = 'block';
+
+            copyToClipboard(lastGeneratedList.join('\n'));
+            renderKeyCards();
+            notify(`Saved & Copied ${lastGeneratedList.length} Key(s)`);
+        } catch (err) {
+            notify('Write Error: ' + err.message);
+        }
+    }
+
+    function copyLastGenerated() {
+        if (!lastGeneratedList.length) return;
+        copyToClipboard(lastGeneratedList.join('\n'));
+        notify('Copied to Clipboard');
+    }
+
+    // =========================================================================
+    // SECTION 2: LICENSE DIRECTORY & ACTIONS
+    // =========================================================================
+    function isExpiredDate(str) {
+        if (!str || str === 'Not Activated') return false;
+        const ts = Date.parse(str.replace(/-/g, '/'));
+        return !isNaN(ts) && Date.now() > ts;
+    }
+
+    function setKeyFilter(f) {
+        keyFilter = f;
+        ['ALL', 'ACTIVE', 'UNUSED', 'BLOCKED'].forEach(k => {
+            document.getElementById('flt-' + k).classList.toggle('active', k === f);
+        });
+        renderKeyCards();
+    }
+
+    function renderKeyCards() {
+        const container = document.getElementById('key-list-container');
+        const q = (document.getElementById('inp-search').value || '').toLowerCase();
+        container.innerHTML = '';
+
+        const keys = Object.keys(keysMap).reverse();
+        let total = 0, active = 0, unused = 0, blocked = 0, shown = 0;
+
+        keys.forEach(k => {
+            const item = keysMap[k];
+            if (!item || typeof item !== 'object') return;
+            total++;
+
+            let badgeClass = 'unused', badgeText = 'UNUSED';
+            if (item.Blocked) {
+                badgeClass = 'blocked'; badgeText = 'BLOCKED'; blocked++;
+            } else if (isExpiredDate(item.Expiry)) {
+                badgeClass = 'expired'; badgeText = 'EXPIRED';
+            } else if (item.Device && item.Device.trim() !== '') {
+                badgeClass = 'active'; badgeText = 'ACTIVE'; active++;
+            } else {
+                unused++;
+            }
+
+            if (keyFilter !== 'ALL' && badgeText !== keyFilter) return;
+
+            const hay = `${k} ${item.Brand||''} ${item.Model||''} ${item.Device||''}`.toLowerCase();
+            if (q && !hay.includes(q)) return;
+            shown++;
+
+            const hwModel = item.Device ? `${item.Brand || ''} ${item.Model || 'Device'}` : 'Unbound (0/1)';
+            const expInfo = item.Expiry === 'Not Activated'
+                ? `${item.DurationHours || 24}h on Login`
+                : (item.Expiry || 'Unlimited');
+
+            const card = document.createElement('div');
+            card.className = 'lic-card';
+            card.innerHTML = `
+                <div class="lic-head">
+                    <span class="lic-code">${k}</span>
+                    <span class="lic-badge ${badgeClass}">${badgeText}</span>
+                </div>
+                <div class="lic-info-grid">
+                    <div>
+                        <div class="info-cell-lbl">Hardware Bound</div>
+                        <div class="info-cell-val">${hwModel}</div>
+                    </div>
+                    <div>
+                        <div class="info-cell-lbl">Expiration</div>
+                        <div class="info-cell-val">${expInfo}</div>
+                    </div>
+                </div>
+                <div class="lic-actions">
+                    <button class="act-btn pri" onclick="copySingleKey('${k}')">COPY</button>
+                    <button class="act-btn" onclick="resetKeyHardware('${k}')">RESET ID</button>
+                    <button class="act-btn warn" onclick="toggleKeyBlock('${k}')">${item.Blocked ? 'UNBLOCK' : 'BLOCK'}</button>
+                    <button class="act-btn dan" onclick="deleteLicense('${k}')">DELETE</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        document.getElementById('kpi-total').innerText = total;
+        document.getElementById('kpi-active').innerText = active;
+        document.getElementById('kpi-unused').innerText = unused;
+        document.getElementById('kpi-blocked').innerText = blocked;
+        document.getElementById('list-counter').innerText = `${shown} Keys`;
+    }
+
+    function copyToClipboard(text) {
+        if (window.RexNativeBridge && window.RexNativeBridge.copyToClipboard) {
+            window.RexNativeBridge.copyToClipboard(text);
+        } else if (navigator.clipboard) {
+            navigator.clipboard.writeText(text);
+        }
+    }
+
+    function copySingleKey(k) {
+        copyToClipboard(k);
+        notify('Key Copied');
+    }
+
+    async function resetKeyHardware(k) {
+        const patch = { Device: '', Brand: '', Model: '', Android: '', Devices: '0 / 1', Status: 'Inactive' };
+        await fbRequest(`Keys/${k}`, 'PATCH', patch);
+        Object.assign(keysMap[k], patch);
+        renderKeyCards();
+        notify('Hardware ID Reset');
+    }
+
+    async function toggleKeyBlock(k) {
+        const next = !keysMap[k].Blocked;
+        const patch = { Blocked: next, Status: next ? 'Blocked' : 'Active' };
+        await fbRequest(`Keys/${k}`, 'PATCH', patch);
+        Object.assign(keysMap[k], patch);
+        renderKeyCards();
+        notify(next ? 'Key Blocked' : 'Key Unblocked');
+    }
+
+    async function deleteLicense(k) {
+        await fbRequest(`Keys/${k}`, 'DELETE', null);
+        delete keysMap[k];
+        renderKeyCards();
+        notify('Key Deleted');
+    }
+
+    // =========================================================================
+    // SECTION 3 & 4: DIALOG, TRIAL & FORCE UPDATE CONFIG
+    // =========================================================================
+    function populateDialogFields() {
+        document.getElementById('dlg-htitle').value = dialogMap.headerTitle || 'REX VIP 2.0';
+        document.getElementById('dlg-hsub').value = dialogMap.headerSubtitle || '● v1.0 • CLOUD PROTECTED';
+        document.getElementById('dlg-title').value = dialogMap.title || 'VIP License Authentication';
+        document.getElementById('dlg-msg').value = dialogMap.message || 'Enter your license key below to activate.\nKey binds automatically to your device on login.';
+        document.getElementById('dlg-hint').value = dialogMap.hint || 'XXXX-XXXX-XXXX';
+        document.getElementById('dlg-buytxt').value = dialogMap.buyText || 'GET KEY';
+        document.getElementById('dlg-oktxt').value = dialogMap.okText || 'LOGIN';
+        document.getElementById('dlg-tg').value = dialogMap.telegramUrl || dialogMap.buyUrl || 'https://t.me/RevNISH';
+        document.getElementById('dlg-trial-txt').value = dialogMap.trialText || 'START FREE TRIAL';
+
+        document.getElementById('upd-code').value = dialogMap.latestVersionCode || 1;
+        document.getElementById('upd-name').value = dialogMap.latestVersionName || '2.0';
+        document.getElementById('upd-apk').value = dialogMap.apkUrl || '';
+        document.getElementById('upd-msg').value = dialogMap.updateMessage || 'A new security update is available. Click Update Now.';
+        document.getElementById('upd-maint-msg').value = dialogMap.maintenanceMsg || 'Server is under maintenance. Please wait.';
+
+        document.getElementById('sw-trial').classList.toggle('on', !!dialogMap.trialEnabled);
+        document.getElementById('sw-update').classList.toggle('on', !!dialogMap.forceUpdate);
+        document.getElementById('sw-maint').classList.toggle('on', !!dialogMap.maintenance);
+    }
+
+    async function saveDialogConfig() {
+        const payload = {
+            headerTitle: document.getElementById('dlg-htitle').value.trim(),
+            headerSubtitle: document.getElementById('dlg-hsub').value.trim(),
+            title: document.getElementById('dlg-title').value.trim(),
+            message: document.getElementById('dlg-msg').value.trim(),
+            hint: document.getElementById('dlg-hint').value.trim(),
+            buyText: document.getElementById('dlg-buytxt').value.trim(),
+            okText: document.getElementById('dlg-oktxt').value.trim(),
+            telegramUrl: document.getElementById('dlg-tg').value.trim(),
+            buyUrl: document.getElementById('dlg-tg').value.trim(),
+            trialEnabled: document.getElementById('sw-trial').classList.contains('on'),
+            trialText: document.getElementById('dlg-trial-txt').value.trim(),
+            forceUpdate: document.getElementById('sw-update').classList.contains('on'),
+            latestVersionCode: parseInt(document.getElementById('upd-code').value || '1'),
+            latestVersionName: document.getElementById('upd-name').value.trim(),
+            updateTitle: 'Update Required (v' + document.getElementById('upd-name').value.trim() + ')',
+            updateMessage: document.getElementById('upd-msg').value.trim(),
+            apkUrl: document.getElementById('upd-apk').value.trim(),
+            maintenance: document.getElementById('sw-maint').classList.contains('on'),
+            maintenanceMsg: document.getElementById('upd-maint-msg').value.trim()
+        };
+
+        try {
+            await fbRequest('Dialog', 'PATCH', payload);
+            dialogMap = payload;
+            notify('Synced Live with Client App');
+        } catch (err) {
+            notify('Failed: ' + err.message);
+        }
+    }
+
+    function renderTrialDevices() {
+        const box = document.getElementById('trial-list-container');
+        box.innerHTML = '';
+        const ids = Object.keys(trialsMap);
+        document.getElementById('trial-counter').innerText = `${ids.length} Devices`;
+
+        ids.forEach(id => {
+            const u = trialsMap[id];
+            if (!u || typeof u !== 'object') return;
+            const bClass = u.Blocked ? 'blocked' : 'active';
+            const bText = u.Blocked ? 'BLOCKED' : (u.TrialUsed ? 'TRIAL USED' : 'ELIGIBLE');
+
+            const div = document.createElement('div');
+            div.className = 'lic-card';
+            div.innerHTML = `
+                <div class="lic-head">
+                    <span class="lic-code">${u.Brand || 'Android'} ${u.Model || id}</span>
+                    <span class="lic-badge ${bClass}">${bText}</span>
+                </div>
+                <div class="lic-info-grid">
+                    <div>
+                        <div class="info-cell-lbl">Hardware ID</div>
+                        <div class="info-cell-val">${id}</div>
+                    </div>
+                    <div>
+                        <div class="info-cell-lbl">Last Active</div>
+                        <div class="info-cell-val">${u.LastLogin || '-'}</div>
+                    </div>
+                </div>
+                <div class="lic-actions" style="grid-template-columns: repeat(3, 1fr);">
+                    <button class="act-btn pri" onclick="updateTrialDevice('${id}', {TrialUsed:false, Blocked:false})">ALLOW AGAIN</button>
+                    <button class="act-btn warn" onclick="updateTrialDevice('${id}', {Blocked:${!u.Blocked}})">${u.Blocked ? 'UNBLOCK' : 'BLOCK'}</button>
+                    <button class="act-btn dan" onclick="deleteTrialDevice('${id}')">DELETE</button>
+                </div>
+            `;
+            box.appendChild(div);
+        });
+    }
+
+    async function updateTrialDevice(id, patch) {
+        await fbRequest(`Trials/${id}`, 'PATCH', patch);
+        Object.assign(trialsMap[id], patch);
+        renderTrialDevices();
+        notify('Trial Hardware Updated');
+    }
+
+    async function deleteTrialDevice(id) {
+        await fbRequest(`Trials/${id}`, 'DELETE', null);
+        delete trialsMap[id];
+        renderTrialDevices();
+        notify('Device Removed');
+    }
+
+    window.addEventListener('DOMContentLoaded', syncDatabase);
+</script>
+</body>
+</html>
