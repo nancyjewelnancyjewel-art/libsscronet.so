@@ -597,7 +597,7 @@
                 </svg>
             </div>
             <div>
-                <div class="brand-title">YEJI & ME🎀</div>
+                <div class="brand-title">REX CONSOLE</div>
                 <div class="brand-sub" id="sync-sub">NODE: /licenses</div>
             </div>
         </div>
@@ -656,7 +656,7 @@
             <div class="grid-2">
                 <div class="field-group">
                     <div class="field-label"><span>Duration</span></div>
-                    <select class="pro-select" id="inp-hours">
+                    <select class="pro-select" id="inp-hours" onchange="toggleCustomDuration()">
                         <option value="2">2 Hours</option>
                         <option value="12">12 Hours</option>
                         <option value="24">1 Day (24h)</option>
@@ -665,7 +665,11 @@
                         <option value="720" selected>30 Days</option>
                         <option value="2160">90 Days</option>
                         <option value="8760">365 Days</option>
+                        <!-- কাস্টম দিন সিলেক্ট করার অপশন -->
+                        <option value="custom">Custom Days</option>
                     </select>
+                    <!-- কাস্টম দিন লেখার বক্স (ডিফল্টভাবে লুকানো থাকবে) -->
+                    <input type="number" class="pro-input" id="inp-custom-days" placeholder="Days (e.g. 500)" style="display:none; margin-top:8px;" min="1">
                 </div>
 
                 <div class="field-group">
@@ -929,7 +933,7 @@
         <span>Dialog</span>
     </div>
     <div class="b-tab" id="tab-system" onclick="openSection('system')">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>System</span>
     </div>
 </div>
@@ -974,6 +978,12 @@
         document.getElementById(id).classList.toggle('on');
     }
 
+    // ড্রপডাউন থেকে 'Custom Days' সিলেক্ট করলে ইনপুট বক্স দেখানোর ফাংশন
+    function toggleCustomDuration() {
+        const val = document.getElementById('inp-hours').value;
+        document.getElementById('inp-custom-days').style.display = (val === 'custom') ? 'block' : 'none';
+    }
+
     function setGenMode(mode) {
         genMode = mode;
         ['single', 'custom', 'bulk'].forEach(m => {
@@ -1006,7 +1016,7 @@
     }
 
     // =========================================================================
-    // New Instant Sync Logic (No loading time for users)
+    // Instant Sync Logic (No loading time for users)
     // =========================================================================
     async function syncDatabase() {
         document.getElementById('cfg-url').value = dbUrl;
@@ -1093,7 +1103,21 @@
     }
 
     async function createLicensesNow() {
-        const hours = parseInt(document.getElementById('inp-hours').value || '720');
+        let hours = 720;
+        const expSelection = document.getElementById('inp-hours').value;
+        
+        // কাস্টম দিন হিসেবে ক্যালকুলেশন
+        if (expSelection === 'custom') {
+            const customDays = parseInt(document.getElementById('inp-custom-days').value);
+            if (!customDays || customDays < 1) {
+                notify('Please enter a valid number of days!');
+                return;
+            }
+            hours = customDays * 24; // দিনকে ঘণ্টায় রূপান্তর
+        } else {
+            hours = parseInt(expSelection);
+        }
+
         const maxDev = Math.max(1, parseInt(document.getElementById('inp-maxdev').value || '1'));
         const startOnLogin = document.getElementById('sw-first-login').classList.contains('on');
         const prefix = document.getElementById('inp-prefix').value.trim().toUpperCase().replace(/[.#$\[\]\/]/g, '');
