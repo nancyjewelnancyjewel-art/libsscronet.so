@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Rex Admin Console</title>
+<title>Ibarhim SK | Admin Console</title>
 <style>
     :root {
         --bg: #E8EEF5;
@@ -796,6 +796,26 @@
         .winter-welcome-overlay { transition: none; }
     }
 
+
+    /* Refined winter finish. Keep all original application component colors intact. */
+    .brand-title[data-brand-name] { cursor: pointer; text-decoration: none; }
+    .brand-title[data-brand-name]:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 4px; border-radius: 4px; }
+    .winter-welcome-card {
+        border: 1px solid rgba(229,232,245,.9);
+        box-shadow: 0 34px 90px rgba(11,18,51,.32), 0 10px 26px rgba(18,29,64,.10);
+    }
+    .winter-welcome-content {
+        background: linear-gradient(180deg, #fcfdff 0%, #fff 65%);
+    }
+    .winter-welcome-overline { letter-spacing: 2.15px; }
+    .winter-welcome-desc { color: #526078; font-weight: 500; }
+    .winter-welcome-enter { box-shadow: 0 9px 22px rgba(79,70,229,.21); }
+    .winter-welcome-bottom { letter-spacing: 1.25px; color: #9aa4b8; }
+    .winter-welcome-photo { object-position: center 17%; }
+    #winter-snow-front { z-index: 145; }
+    @media (prefers-reduced-motion: reduce) {
+      .winter-snow-canvas { opacity: .5; }
+    }
 </style>
 </head>
 <body oncontextmenu="return false;">
@@ -813,11 +833,11 @@
       </div>
     </div>
     <div class="winter-welcome-content">
-      <span class="winter-welcome-overline">REX CONSOLE</span>
+      <span class="winter-welcome-overline" data-brand-name>IBARHIM SK</span>
       <h2 class="winter-welcome-heading" id="welcome-heading">Welcome <em>Back.</em></h2>
-      <p class="winter-welcome-desc">Your workspace is ready. Manage everything in one place and enjoy the winter season.</p>
+      <p class="winter-welcome-desc">Your workspace is ready. Manage your licenses and settings with ease.</p>
       <button class="winter-welcome-enter" type="button" onclick="closeWelcomeDialog()">Enter Dashboard <span aria-hidden="true">→</span></button>
-      <div class="winter-welcome-bottom">❄ &nbsp; WINTER 2026 &nbsp; · &nbsp; REX CONSOLE</div>
+      <div class="winter-welcome-bottom">❄ &nbsp; WINTER EDITION &nbsp; · &nbsp; <span data-brand-name>IBARHIM SK</span></div>
     </div>
   </div>
 </div>
@@ -834,7 +854,7 @@
                 </svg>
             </div>
             <div>
-                <div class="brand-title">REX CONSOLE</div>
+                <div class="brand-title" data-brand-name role="button" tabindex="0" aria-label="Edit panel name" title="Tap to edit your panel name" onclick="editPanelBrandName()" onkeydown="if(event.key === 'Enter') editPanelBrandName()">IBARHIM SK</div>
                 <div class="brand-sub" id="sync-sub">NODE: /licenses</div>
             </div>
         </div>
@@ -917,12 +937,12 @@
 
             <div class="field-group" id="wrap-custom" style="display:none;">
                 <div class="field-label"><span>Custom Key String</span><span>Required</span></div>
-                <input type="text" class="pro-input" id="inp-custom" placeholder="Enter exact key (e.g. REX-VIP-2026)">
+                <input type="text" class="pro-input" id="inp-custom" placeholder="Enter exact key (e.g. VIP-2026-XXXX)">
             </div>
 
             <div class="field-group" id="wrap-prefix">
                 <div class="field-label"><span>Key Prefix</span><span>Optional</span></div>
-                <input type="text" class="pro-input" id="inp-prefix" value="VIP" placeholder="e.g. VIP or REX">
+                <input type="text" class="pro-input" id="inp-prefix" value="VIP" placeholder="e.g. VIP or PRO">
             </div>
 
             <div class="field-group" id="wrap-qty" style="display:none;">
@@ -1017,7 +1037,7 @@
             <div class="grid-2">
                 <div class="field-group">
                     <div class="field-label"><span>Header Title</span></div>
-                    <input type="text" class="pro-input" id="dlg-htitle" placeholder="REX VIP 2.0">
+                    <input type="text" class="pro-input" id="dlg-htitle" placeholder="IBARHIM VIP 2.0">
                 </div>
                 <div class="field-group">
                     <div class="field-label"><span>Header Status</span></div>
@@ -1326,9 +1346,9 @@
 
     function generateRandomSample() {
         if (genMode === 'custom') {
-            document.getElementById('inp-custom').value = `REX-${randomChars(4)}-${randomChars(4)}`;
+            document.getElementById('inp-custom').value = `VIP-${randomChars(4)}-${randomChars(4)}`;
         } else {
-            const prefixes = ['VIP', 'REX', 'PRO', 'MAX'];
+            const prefixes = ['VIP', 'PLUS', 'PRO', 'MAX'];
             document.getElementById('inp-prefix').value = prefixes[Math.floor(Math.random() * prefixes.length)];
         }
     }
@@ -1545,7 +1565,7 @@
     // SECTION 3 & 4: DIALOG, TRIAL & FORCE UPDATE CONFIG
     // =========================================================================
     function populateDialogFields() {
-        document.getElementById('dlg-htitle').value = dialogMap.headerTitle || 'REX VIP 2.0';
+        document.getElementById('dlg-htitle').value = dialogMap.headerTitle || 'IBARHIM VIP 2.0';
         document.getElementById('dlg-hsub').value = dialogMap.headerSubtitle || '● v1.0 • CLOUD PROTECTED';
         document.getElementById('dlg-title').value = dialogMap.title || 'VIP License Authentication';
         document.getElementById('dlg-msg').value = dialogMap.message || 'Enter your license key below to activate.\nKey binds automatically to your device on login.';
@@ -1653,9 +1673,27 @@
 
     
 
-    // WINTER EDITION: two-depth canvas snowfall, no DOM flakes or click interception.
+    // Winter snowfall: soft, layered, high-DPI particles. No thick white bubbles,
+    // outlines, or giant six-arm icons. Canvas cannot intercept user interactions.
     const welcomeOverlay = document.getElementById('welcome-overlay');
     const welcomeReopen = document.getElementById('welcome-reopen');
+    const defaultPanelName = 'IBARHIM SK';
+
+    function applyPanelBrandName() {
+        let name = defaultPanelName;
+        try { name = localStorage.getItem('admin_panel_display_name') || defaultPanelName; } catch (_) {}
+        name = name.trim().slice(0, 38) || defaultPanelName;
+        document.querySelectorAll('[data-brand-name]').forEach(el => el.textContent = name);
+        document.title = name + ' | Admin Console';
+    }
+    function editPanelBrandName() {
+        const present = document.querySelector('.brand-title[data-brand-name]').textContent;
+        const chosen = prompt('Panel display name:', present);
+        if (chosen === null || !chosen.trim()) return;
+        try { localStorage.setItem('admin_panel_display_name', chosen.trim().slice(0, 38)); } catch (_) {}
+        applyPanelBrandName();
+    }
+    applyPanelBrandName();
 
     function closeWelcomeDialog() {
         welcomeOverlay.classList.add('hidden');
@@ -1666,148 +1704,149 @@
         welcomeReopen.classList.remove('show');
     }
     document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && !welcomeOverlay.classList.contains('hidden')) {
-            closeWelcomeDialog();
-        }
+        if (event.key === 'Escape' && !welcomeOverlay.classList.contains('hidden')) closeWelcomeDialog();
     });
 
-    (function initializeWinterSnow() {
-        const canvases = [
-            document.getElementById('winter-snow-back'),
-            document.getElementById('winter-snow-front')
-        ];
-        const ctxs = canvases.map(c => c.getContext('2d'));
-        if (ctxs.some(c => !c)) return;
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-        const layers = [[], []];
-        const rand = (min, max) => min + Math.random() * (max - min);
-        let w = 0, h = 0, scale = 1, frame = 0, last = 0;
-        let running = false;
-        const createFlake = (layer, fromTop = false) => {
-            const depth = Math.random();
-            return {
-                x: rand(0, w),
-                y: fromTop ? rand(-50, -5) : rand(0, h),
-                size: layer === 0 ? rand(1.2, 3.5) : rand(1.5, 4.2),
-                speed: rand(.35, .85) + depth * .53,
-                wind: rand(-.12, .12),
-                amplitude: rand(8, 26),
-                phase: rand(0, Math.PI * 2),
-                frequency: rand(.0003, .00075),
-                opacity: rand(.47, .85),
-                crystal: Math.random() < (layer === 0 ? .12 : .27),
-                angle: rand(0, Math.PI * 2)
-            };
-        };
-        function resizeSnow() {
-            w = window.innerWidth;
-            h = window.innerHeight;
-            scale = Math.min(window.devicePixelRatio || 1, 1.75);
-            canvases.forEach((canvas, i) => {
-                canvas.width = Math.floor(w * scale);
-                canvas.height = Math.floor(h * scale);
-                ctxs[i].setTransform(scale, 0, 0, scale, 0, 0);
-            });
-            const small = w < 640;
-            layers[0] = Array.from({length: small ? 69 : 115}, () => createFlake(0));
-            layers[1] = Array.from({length: small ? 17 : 29}, () => createFlake(1));
+    (function startPremiumSnow() {
+        const back = document.getElementById('winter-snow-back');
+        const front = document.getElementById('winter-snow-front');
+        const backCtx = back.getContext('2d', { alpha: true });
+        const frontCtx = front.getContext('2d', { alpha: true });
+        if (!backCtx || !frontCtx) return;
+
+        const rand = (a, b) => a + Math.random() * (b - a);
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const layers = [[], [], []];
+        const sprites = {};
+        let W = 0, H = 0, dpr = 1, frameId = 0, lastTime = 0, active = false;
+
+        // Pre-render subtle radial fades. Sprites use soft falloff instead of
+        // hard-edged white circles, to resemble fine powder snow.
+        function sprite(tone) {
+            if (sprites[tone]) return sprites[tone];
+            const canvas = document.createElement('canvas');
+            canvas.width = 40;
+            canvas.height = 40;
+            const cx = canvas.getContext('2d');
+            if (!cx) return canvas;
+            const grad = cx.createRadialGradient(20, 20, 0, 20, 20, 19);
+            const c = tone === 'light' ? '115,135,175' : '247,250,255';
+            grad.addColorStop(0, `rgba(${c},.88)`);
+            grad.addColorStop(.22, `rgba(${c},.58)`);
+            grad.addColorStop(.55, `rgba(${c},.12)`);
+            grad.addColorStop(1, `rgba(${c},0)`);
+            cx.fillStyle = grad;
+            cx.fillRect(0, 0, 40, 40);
+            sprites[tone] = canvas;
+            return canvas;
         }
-        function drawFlake(ctx, f, i, time, foreground) {
-            const sway = Math.sin(time * f.frequency + f.phase) * f.amplitude;
-            const x = f.x + sway;
+
+        function createParticle(depth, topOnly = false) {
+            const tiny = depth === 0;
+            const close = depth === 2;
+            return {
+                x: rand(-12, W + 12),
+                y: topOnly ? rand(-60, -4) : rand(-20, H + 10),
+                radius: tiny ? rand(.7, 1.3) : (close ? rand(1.4, 2.25) : rand(.95, 1.75)),
+                speed: tiny ? rand(.18, .36) : (close ? rand(.62, .94) : rand(.36, .62)),
+                drift: rand(-.16, .16),
+                swing: rand(2, 11),
+                frequency: rand(.00035, .0007),
+                phase: rand(0, Math.PI * 2),
+                opacity: tiny ? rand(.16, .38) : (close ? rand(.28, .55) : rand(.24, .48)),
+                kind: Math.random() < .13 ? 'ice' : 'powder',
+                rotation: rand(-.4, .4)
+            };
+        }
+
+        function resizeSnow() {
+            W = window.innerWidth;
+            H = window.innerHeight;
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            [back, front].forEach((canvas, i) => {
+                canvas.width = Math.round(W * dpr);
+                canvas.height = Math.round(H * dpr);
+                canvas.style.width = W + 'px';
+                canvas.style.height = H + 'px';
+                (i === 0 ? backCtx : frontCtx).setTransform(dpr, 0, 0, dpr, 0, 0);
+            });
+            const narrow = W < 700;
+            layers[0] = Array.from({length: narrow ? 34 : 55}, () => createParticle(0));
+            layers[1] = Array.from({length: narrow ? 19 : 32}, () => createParticle(1));
+            layers[2] = Array.from({length: narrow ? 7 : 12}, () => createParticle(2));
+        }
+
+        function paintParticle(ctx, f, t, layer, heroBottom, dialogVisible, dialogBox) {
+            const x = f.x + Math.sin(t * f.frequency + f.phase) * f.swing;
             const y = f.y;
-            const radius = f.size * (foreground ? 1.06 : 1);
-            const alpha = foreground ? f.opacity * .86 : f.opacity * .78;
-            if (f.crystal) {
-                const arm = Math.max(2.8, radius * 2.1);
+            // Keep modal content crisp: snowfall is visible around, not on top of, the card.
+            if (dialogVisible && layer === 2 && dialogBox &&
+                x > dialogBox.left - 5 && x < dialogBox.right + 5 &&
+                y > dialogBox.top - 5 && y < dialogBox.bottom + 5) return;
+            const onDark = dialogVisible || y < heroBottom;
+            ctx.globalAlpha = f.opacity * (onDark ? 1 : .87);
+            const size = f.radius * (layer === 2 ? 6.4 : 5.6);
+            ctx.drawImage(sprite(onDark ? 'dark' : 'light'), x - size / 2, y - size / 2, size, size);
+            if (f.kind === 'ice' && f.radius > 1.1) {
+                // One subtle, sharp crystalline glint; no cartoon snowflake icon.
                 ctx.save();
                 ctx.translate(x, y);
-                ctx.rotate(f.angle + Math.sin(time * .00035 + i) * .14);
-                ctx.lineCap = 'round';
-                ctx.lineWidth = foreground ? .92 : .78;
-                ctx.strokeStyle = `rgba(89,111,175,${alpha * .45})`;
+                ctx.rotate(f.rotation);
+                ctx.strokeStyle = onDark ? 'rgba(250,253,255,.6)' : 'rgba(110,135,172,.43)';
+                ctx.lineWidth = .48;
                 ctx.beginPath();
-                for (let a = 0; a < 6; a++) {
-                    const t = a * Math.PI / 3;
-                    const dx = Math.cos(t), dy = Math.sin(t);
-                    ctx.moveTo(-dx * .5 + .5, -dy * .5 + .5);
-                    ctx.lineTo(dx * arm + .5, dy * arm + .5);
-                }
-                ctx.stroke();
-                ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-                ctx.beginPath();
-                for (let a = 0; a < 6; a++) {
-                    const t = a * Math.PI / 3;
-                    const dx = Math.cos(t), dy = Math.sin(t);
-                    ctx.moveTo(0, 0);
-                    ctx.lineTo(dx * arm, dy * arm);
-                    if (arm > 3) {
-                        const bx = dx * arm * .57, by = dy * arm * .57;
-                        const branch = arm * .24;
-                        ctx.moveTo(bx + Math.cos(t + .62) * branch, by + Math.sin(t + .62) * branch);
-                        ctx.lineTo(bx, by);
-                        ctx.lineTo(bx + Math.cos(t - .62) * branch, by + Math.sin(t - .62) * branch);
-                    }
-                }
+                ctx.moveTo(-f.radius, 0); ctx.lineTo(f.radius, 0);
+                ctx.moveTo(0, -f.radius); ctx.lineTo(0, f.radius);
                 ctx.stroke();
                 ctx.restore();
-            } else {
-                ctx.beginPath();
-                ctx.arc(x, y, radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-                ctx.fill();
-                ctx.lineWidth = .55;
-                ctx.strokeStyle = `rgba(77,97,168,${alpha * .42})`;
-                ctx.stroke();
-                if (radius > 2.8) {
-                    ctx.beginPath();
-                    ctx.arc(x, y, radius * 1.9, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(222,236,255,${alpha * .12})`;
-                    ctx.fill();
-                }
             }
+            ctx.globalAlpha = 1;
         }
-        function tick(time) {
-            if (!running) return;
-            const dt = last ? Math.min((time - last) / 16.67, 2.3) : 1;
-            last = time;
-            ctxs.forEach((ctx, layer) => {
-                ctx.clearRect(0, 0, w, h);
-                layers[layer].forEach((flake, i) => {
-                    flake.y += flake.speed * dt;
-                    flake.x += flake.wind * dt;
-                    if (flake.y > h + 20 || flake.x < -50 || flake.x > w + 50) {
-                        layers[layer][i] = createFlake(layer, true);
+
+        function render(t) {
+            if (!active) return;
+            const dt = lastTime ? Math.min((t - lastTime) / 16.67, 2) : 1;
+            lastTime = t;
+            backCtx.clearRect(0, 0, W, H);
+            frontCtx.clearRect(0, 0, W, H);
+            const headerRect = document.querySelector('.app-header').getBoundingClientRect();
+            const darkEnd = headerRect.bottom;
+            const dialogVisible = !welcomeOverlay.classList.contains('hidden');
+            const dialogBox = dialogVisible ? welcomeOverlay.querySelector('.winter-welcome-card').getBoundingClientRect() : null;
+            layers.forEach((flakes, depth) => {
+                const ctx = depth === 2 ? frontCtx : backCtx;
+                flakes.forEach((f, i) => {
+                    f.y += f.speed * dt;
+                    f.x += f.drift * dt;
+                    if (f.y > H + 15 || f.x < -24 || f.x > W + 24) {
+                        flakes[i] = createParticle(depth, true);
                         return;
                     }
-                    drawFlake(ctx, flake, i, time, layer === 1);
+                    paintParticle(ctx, f, t, depth, darkEnd, dialogVisible, dialogBox);
                 });
             });
-            frame = requestAnimationFrame(tick);
+            frameId = requestAnimationFrame(render);
         }
-        function setRunning() {
-            const shouldRun = !document.hidden && !reduceMotion.matches;
-            if (shouldRun === running) return;
-            running = shouldRun;
-            if (running) {
-                last = 0;
-                frame = requestAnimationFrame(tick);
+
+        function setSnowState() {
+            const next = !document.hidden && !reducedMotion.matches;
+            if (active === next) return;
+            active = next;
+            if (active) {
+                lastTime = 0;
+                frameId = requestAnimationFrame(render);
             } else {
-                cancelAnimationFrame(frame);
-                if (reduceMotion.matches) {
-                    ctxs.forEach((ctx, layer) => {
-                        ctx.clearRect(0, 0, w, h);
-                        layers[layer].forEach((f, i) => drawFlake(ctx, f, i, 0, layer === 1));
-                    });
-                }
+                cancelAnimationFrame(frameId);
+                backCtx.clearRect(0, 0, W, H);
+                frontCtx.clearRect(0, 0, W, H);
             }
         }
         resizeSnow();
         window.addEventListener('resize', resizeSnow, {passive: true});
-        document.addEventListener('visibilitychange', setRunning);
-        if (reduceMotion.addEventListener) reduceMotion.addEventListener('change', setRunning);
-        else if (reduceMotion.addListener) reduceMotion.addListener(setRunning);
-        setRunning();
+        document.addEventListener('visibilitychange', setSnowState);
+        if (reducedMotion.addEventListener) reducedMotion.addEventListener('change', setSnowState);
+        else if (reducedMotion.addListener) reducedMotion.addListener(setSnowState);
+        setSnowState();
     })();
 
     window.addEventListener('DOMContentLoaded', syncDatabase);
