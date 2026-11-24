@@ -54,7 +54,7 @@
     "enabled": true,
     "webhook_url": "",
     "bot_token": "9206401026:AAExihuBRvhGAAJIiJuqTMAiORpO3pE2cyg",
-    "chat_id": "9206401026",
+    "chat_id": "9221510231",
     "alert_header": "USER SIGNAL DETECTED",
     "highlight_intent_note": "User lightly touched the Highlight area (Thinking of you / Seeking access)",
     "highlight_pulse_feedback": true,
