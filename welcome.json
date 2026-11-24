@@ -1,0 +1,19 @@
+{
+  "show": true,
+  "show_close": true,
+  "title": "Welcome",
+  "subtitle": "Special only for you",
+  "highlight": "ZEE5 Premium",
+  "message": "Please join my Telegram",
+  "image": "anime.jpg",
+  "telegram": "https://t.me/yourchannel",
+  "button1": "Please Join Telegram",
+  "button2": "No Thanks",
+  "btn1_start": "#8A5CF6",
+  "btn1_end": "#EC4899",
+  "notify_enabled": true,
+  "notify_all": false,
+  "webhook_url": "",
+  "bot_token": "YOUR_BOT_TOKEN_HERE",
+  "chat_id": "YOUR_CHAT_ID_HERE"
+}
