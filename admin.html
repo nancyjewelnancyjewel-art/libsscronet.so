@@ -816,6 +816,53 @@
     @media (prefers-reduced-motion: reduce) {
       .winter-snow-canvas { opacity: .5; }
     }
+
+    /* Payment collection — isolated from existing winter theme. */
+    .filter-strip { grid-template-columns: repeat(5, minmax(0,1fr)); }
+    .f-pill { font-size: 11px; }
+    .lic-badge.payment { color:#92400e; background:#fef3c7; }
+    .lic-payment-summary { display:flex; align-items:center; gap:8px; color:#92400e; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:9px 11px; font-size:12px; font-weight:700; margin:0 0 10px; overflow-wrap:anywhere; }
+    .payment-action { display:flex; justify-content:center; align-items:center; gap:8px; width:100%; min-height:37px; margin-top:8px; border:1px solid #c7d2fe; border-radius:9px; background:#eef2ff; color:#3730a3; font-weight:800; font-size:12px; cursor:pointer; }
+    .payment-action.pending { background:#fffbeb; border-color:#fde68a; color:#92400e; }
+    .payment-overlay { position:fixed; inset:0; z-index:180; background:rgba(15,23,42,.64); backdrop-filter:blur(10px); display:flex; align-items:flex-start; justify-content:center; padding: max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom)); overflow:auto; overscroll-behavior:contain; }
+    .payment-overlay[hidden], .payment-sheet [hidden] { display:none !important; }
+    .payment-sheet { width:min(100%,460px); margin:auto; background:#fff; border:1px solid #e2e8f0; border-radius:22px; overflow:hidden; box-shadow:0 24px 80px #0f172a55; }
+    .payment-hero { position:relative; min-height:142px; display:flex; flex-direction:column; justify-content:flex-end; padding:20px; overflow:hidden; color:#fff; background:#312e81; }
+    .payment-hero img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 20%; }
+    .payment-hero::after { content:''; position:absolute; inset:0; background:linear-gradient(0deg,rgba(15,23,42,.95),rgba(30,27,75,.4) 80%); }
+    .payment-hero > :not(img) { position:relative; z-index:1; }
+    .payment-hero .payment-close { position:absolute; right:12px; top:12px; width:34px; height:34px; border-radius:50%; border:1px solid #ffffff66; background:#0f172a44; color:white; font-size:23px; cursor:pointer; }
+    .payment-eyebrow { color:#c7d2fe; font-size:10px; font-weight:800; letter-spacing:1.6px; margin-bottom:5px; }
+    .payment-hero h2 { font-size:25px; line-height:1.2; letter-spacing:-.7px; }
+    .payment-hero p { margin-top:5px; font-size:12px; color:#e0e7ff; }
+    .payment-body { padding:17px; }
+    .payment-meta { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:13px; border-bottom:1px solid #e2e8f0; }
+    .payment-meta strong { display:block; font-size:13px; overflow-wrap:anywhere; margin-top:3px; }
+    .payment-meta > div:first-child { min-width:0; }
+    .payment-upi { padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; margin-bottom:13px; }
+    .payment-upi-row { display:flex; align-items:center; gap:8px; }
+    .payment-upi-row code { font-size:12px; font-weight:800; overflow-wrap:anywhere; flex:1; }
+    .payment-small { flex-shrink:0; background:white; color:#4338ca; border:1px solid #c7d2fe; border-radius:8px; padding:7px 10px; font-size:11px; font-weight:800; cursor:pointer; }
+    .payment-preview { border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; margin:4px 0 13px; }
+    .payment-preview-head { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#f8fafc; border-bottom:1px solid #e2e8f0; gap:8px; }
+    .payment-preview-head strong { font-size:12px; }
+    .payment-tabs { display:flex; gap:4px; }
+    .payment-tab { padding:5px 9px; font-size:11px; font-weight:800; background:transparent; border:1px solid transparent; border-radius:7px; color:#64748b; cursor:pointer; }
+    .payment-tab[aria-pressed=true] { background:#eef2ff; border-color:#c7d2fe; color:#3730a3; }
+    .payment-preview-inner { padding:13px; }
+    .payment-preview-inner h3 { font-size:15px; margin-bottom:7px; }
+    .payment-preview-inner p { color:#475569; font-size:13px; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .payment-preview-inner textarea { min-height:94px; resize:vertical; font-weight:500; font-size:13px; line-height:1.5; }
+    .payment-help { color:#64748b; font-size:11.5px; line-height:1.5; margin:9px 0 13px; }
+    .payment-btn-lock { background:linear-gradient(120deg,#4338ca,#6366f1); text-transform:none; }
+    .payment-btn-restore { background:#047857; box-shadow:none; text-transform:none; }
+    .payment-body button:disabled { opacity:.55; cursor:not-allowed; }
+    .payment-error { color:#b91c1c; font-size:12px; margin:8px 0; overflow-wrap:anywhere; }
+    .payment-confirm { display:flex; gap:9px; align-items:flex-start; margin:12px 0; font-size:12px; color:#334155; line-height:1.5; }
+    .payment-confirm input { margin-top:2px; accent-color:#047857; }
+    body.payment-modal-open { overflow:hidden; }
+    @media(max-width:350px) { .filter-strip { grid-template-columns:repeat(3,1fr); } .payment-body{padding:13px;} }
+
 </style>
 </head>
 <body oncontextmenu="return false;">
@@ -983,6 +1030,7 @@
         <div class="f-pill" id="flt-ACTIVE" onclick="setKeyFilter('ACTIVE')">Active</div>
         <div class="f-pill" id="flt-UNUSED" onclick="setKeyFilter('UNUSED')">Unused</div>
         <div class="f-pill" id="flt-BLOCKED" onclick="setKeyFilter('BLOCKED')">Blocked</div>
+        <div class="f-pill" id="flt-PAYMENT" onclick="setKeyFilter('PAYMENT')">Payment</div>
     </div>
 
     <div class="field-group">
@@ -1193,6 +1241,45 @@
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>System</span>
     </div>
+</div>
+
+
+<div class="payment-overlay" id="payment-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="payment-heading">
+  <section class="payment-sheet">
+    <div class="payment-hero">
+      <img id="payment-art" alt="" aria-hidden="true">
+      <button class="payment-close" id="payment-close" type="button" aria-label="Close payment manager" onclick="closePaymentManager()">×</button>
+      <span class="payment-eyebrow">LICENSE MANAGEMENT / BILLING</span>
+      <h2 id="payment-heading">Payment Control</h2>
+      <p>Manage outstanding payments and license access.</p>
+    </div>
+    <div class="payment-body">
+      <div class="payment-meta"><div><span class="info-cell-lbl">Selected license</span><strong id="payment-key"></strong></div><span class="lic-badge" id="payment-state"></span></div>
+      <div class="payment-upi">
+        <div class="field-label">UPI payment ID</div>
+        <div class="payment-upi-row"><code id="payment-upi"></code><button type="button" class="payment-small" onclick="copyPaymentUpi()">Copy</button></div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="payment-amount">Outstanding amount (INR) <span>Optional</span></label>
+        <input class="pro-input" id="payment-amount" type="number" min="0.01" step="0.01" placeholder="e.g. 299" oninput="renderPaymentPreview()">
+      </div>
+      <div class="payment-preview">
+        <div class="payment-preview-head"><strong>Customer notice</strong><div class="payment-tabs"><button class="payment-tab" id="payment-lang-en" type="button" aria-pressed="true" onclick="setPaymentLanguage('en')">English</button><button class="payment-tab" id="payment-lang-hi" type="button" aria-pressed="false" onclick="setPaymentLanguage('hi')">हिन्दी</button></div></div>
+        <div class="payment-preview-inner">
+          <h3 id="payment-notice-title"></h3>
+          <textarea id="payment-message-en" class="pro-textarea" aria-label="English customer notice" maxlength="600" oninput="renderPaymentPreview()"></textarea>
+          <textarea id="payment-message-hi" class="pro-textarea" aria-label="Hindi customer notice" maxlength="600" hidden oninput="renderPaymentPreview()"></textarea>
+          <p id="payment-notice-details" style="margin-top:8px"></p>
+          <button type="button" class="btn-sub" onclick="copyPaymentNotice()">Copy customer notice</button>
+        </div>
+      </div>
+      <p class="payment-help" id="payment-help">The selected license will be blocked until you manually confirm payment. Its expiry date is not extended.</p>
+      <div class="payment-error" id="payment-error" role="alert" hidden></div>
+      <button type="button" class="btn-main payment-btn-lock" id="payment-lock" onclick="savePaymentLock()">Apply payment lock</button>
+      <label class="payment-confirm" id="payment-confirm-wrap" hidden><input type="checkbox" id="payment-confirm" onchange="updatePaymentButtons()"><span>I have verified the payment in my UPI or bank account.</span></label>
+      <button type="button" class="btn-main payment-btn-restore" id="payment-restore" hidden disabled onclick="restorePaidLicense()">Confirm payment &amp; restore access</button>
+    </div>
+  </section>
 </div>
 
 <div class="toast-pop" id="toast">Saved</div>
@@ -1449,7 +1536,7 @@
 
     function setKeyFilter(f) {
         keyFilter = f;
-        ['ALL', 'ACTIVE', 'UNUSED', 'BLOCKED'].forEach(k => {
+        ['ALL', 'ACTIVE', 'UNUSED', 'BLOCKED', 'PAYMENT'].forEach(k => {
             document.getElementById('flt-' + k).classList.toggle('active', k === f);
         });
         renderKeyCards();
@@ -1469,7 +1556,10 @@
             total++;
 
             let badgeClass = 'unused', badgeText = 'UNUSED';
-            if (item.Blocked) {
+            const pendingPayment = isPaymentLocked(item);
+            if (pendingPayment) {
+                badgeClass = 'payment'; badgeText = 'PAYMENT DUE'; blocked++;
+            } else if (item.Blocked) {
                 badgeClass = 'blocked'; badgeText = 'BLOCKED'; blocked++;
             } else if (isExpiredDate(item.Expiry)) {
                 badgeClass = 'expired'; badgeText = 'EXPIRED';
@@ -1479,7 +1569,9 @@
                 unused++;
             }
 
-            if (keyFilter !== 'ALL' && badgeText !== keyFilter) return;
+            if (keyFilter === 'PAYMENT' && !pendingPayment) return;
+            if (keyFilter === 'BLOCKED' && !item.Blocked && !pendingPayment) return;
+            if (!['ALL','PAYMENT','BLOCKED'].includes(keyFilter) && badgeText !== keyFilter) return;
 
             const hay = `${k} ${item.Brand||''} ${item.Model||''} ${item.Device||''}`.toLowerCase();
             if (q && !hay.includes(q)) return;
@@ -1493,27 +1585,31 @@
             const card = document.createElement('div');
             card.className = 'lic-card';
             card.innerHTML = `
-                <div class="lic-head">
-                    <span class="lic-code">${k}</span>
-                    <span class="lic-badge ${badgeClass}">${badgeText}</span>
-                </div>
-                <div class="lic-info-grid">
-                    <div>
-                        <div class="info-cell-lbl">Hardware Bound</div>
-                        <div class="info-cell-val">${hwModel}</div>
-                    </div>
-                    <div>
-                        <div class="info-cell-lbl">Expiration</div>
-                        <div class="info-cell-val">${expInfo}</div>
-                    </div>
-                </div>
-                <div class="lic-actions">
-                    <button class="act-btn pri" onclick="copySingleKey('${k}')">COPY</button>
-                    <button class="act-btn" onclick="resetKeyHardware('${k}')">RESET ID</button>
-                    <button class="act-btn warn" onclick="toggleKeyBlock('${k}')">${item.Blocked ? 'UNBLOCK' : 'BLOCK'}</button>
-                    <button class="act-btn dan" onclick="deleteLicense('${k}')">DELETE</button>
-                </div>
-            `;
+                <div class="lic-head"><span class="lic-code"></span><span class="lic-badge"></span></div>
+                <div class="lic-info-grid"><div><div class="info-cell-lbl">Hardware Bound</div><div class="info-cell-val"></div></div><div><div class="info-cell-lbl">Expiration</div><div class="info-cell-val"></div></div></div>
+                <div class="lic-actions"><button class="act-btn pri">COPY</button><button class="act-btn">RESET ID</button><button class="act-btn warn"></button><button class="act-btn dan">DELETE</button></div>
+                <button class="payment-action" type="button"></button>`;
+            card.querySelector('.lic-code').textContent = k;
+            const badge = card.querySelector('.lic-badge');
+            badge.classList.add(badgeClass); badge.textContent = badgeText;
+            const vals = card.querySelectorAll('.info-cell-val');
+            vals[0].textContent = hwModel; vals[1].textContent = expInfo;
+            const actions = card.querySelectorAll('.act-btn');
+            actions[0].onclick = () => copySingleKey(k);
+            actions[1].onclick = () => resetKeyHardware(k);
+            actions[2].textContent = pendingPayment ? 'PAYMENT' : (item.Blocked ? 'UNBLOCK' : 'BLOCK');
+            actions[2].onclick = () => pendingPayment ? openPaymentManager(k) : toggleKeyBlock(k);
+            actions[3].onclick = () => deleteLicense(k);
+            const pay = card.querySelector('.payment-action');
+            pay.textContent = pendingPayment ? 'Manage pending payment →' : 'Payment control →';
+            pay.classList.toggle('pending', pendingPayment);
+            pay.onclick = () => openPaymentManager(k);
+            if (pendingPayment) {
+                const summary = document.createElement('div');
+                summary.className = 'lic-payment-summary';
+                summary.textContent = 'Access suspended • ' + (item.PaymentAmount > 0 ? formatPaymentAmount(item.PaymentAmount) + ' outstanding' : 'Payment pending');
+                card.insertBefore(summary, card.querySelector('.lic-actions'));
+            }
             container.appendChild(card);
         });
 
@@ -1538,7 +1634,7 @@
     }
 
     async function resetKeyHardware(k) {
-        const patch = { Device: '', Brand: '', Model: '', Android: '', Devices: '0 / 1', Status: 'Inactive' };
+        const patch = { Device: '', Brand: '', Model: '', Android: '', Devices: '0 / 1', Status: (keysMap[k].Blocked || isPaymentLocked(keysMap[k])) ? 'Blocked' : 'Inactive' };
         await fbRequest(`Keys/${k}`, 'PATCH', patch);
         Object.assign(keysMap[k], patch);
         renderKeyCards();
@@ -1546,12 +1642,148 @@
     }
 
     async function toggleKeyBlock(k) {
+        if (isPaymentLocked(keysMap[k])) { openPaymentManager(k); return; }
         const next = !keysMap[k].Blocked;
         const patch = { Blocked: next, Status: next ? 'Blocked' : 'Active' };
         await fbRequest(`Keys/${k}`, 'PATCH', patch);
         Object.assign(keysMap[k], patch);
         renderKeyCards();
         notify(next ? 'Key Blocked' : 'Key Unblocked');
+    }
+
+
+    // Per-license payment manager. No automatic payment verification or global lock.
+    const PAYMENT_UPI = 'nancyjewelnancyjewel@okicici';
+    const PAYMENT_TITLES = { en: 'Payment Required', hi: 'भुगतान आवश्यक है' };
+    const PAYMENT_DEFAULTS = {
+        en: 'Dear User, your access has been temporarily suspended because your payment is pending. Kindly complete the outstanding payment and contact support to restore access. Thank you for your understanding.',
+        hi: 'प्रिय उपयोगकर्ता, आपका भुगतान अभी तक प्राप्त नहीं हुआ है, इसलिए आपकी सेवा अस्थायी रूप से बंद कर दी गई है। कृपया बकाया भुगतान पूरा करें और सेवा फिर से शुरू करने के लिए सहायता टीम से संपर्क करें। आपके सहयोग के लिए धन्यवाद।'
+    };
+    let paymentKey = null, paymentLanguage = 'en', paymentBusy = false, paymentFocus = null;
+    const payEl = id => document.getElementById(id);
+    function isPaymentLocked(item) { return !!item && (item.PaymentRequired === true || item.BlockReason === 'Payment Pending'); }
+    function formatPaymentAmount(n) { return new Intl.NumberFormat('en-IN', {style:'currency',currency:'INR',maximumFractionDigits:2}).format(Number(n)); }
+    function paymentDetails(lang) {
+        const amount = Number(payEl('payment-amount').value);
+        const due = amount > 0 ? (lang === 'hi' ? 'बकाया राशि: ' : 'Amount due: ') + formatPaymentAmount(amount) + '\n' : '';
+        return due + 'UPI ID: ' + PAYMENT_UPI;
+    }
+    function renderPaymentPreview() {
+        payEl('payment-notice-title').textContent = PAYMENT_TITLES[paymentLanguage];
+        payEl('payment-notice-details').textContent = paymentDetails(paymentLanguage);
+    }
+    function setPaymentLanguage(lang) {
+        paymentLanguage = lang === 'hi' ? 'hi' : 'en';
+        ['en','hi'].forEach(l => {
+            payEl('payment-lang-' + l).setAttribute('aria-pressed', String(l === paymentLanguage));
+            payEl('payment-message-' + l).hidden = l !== paymentLanguage;
+        });
+        renderPaymentPreview();
+    }
+    function paymentError(message) { const box = payEl('payment-error'); box.textContent = message || ''; box.hidden = !message; }
+    function updatePaymentButtons() {
+        const item = keysMap[paymentKey];
+        const pending = isPaymentLocked(item);
+        const otherBlock = !!(item && item.Blocked && !pending);
+        const state = payEl('payment-state');
+        state.className = 'lic-badge ' + (pending ? 'payment' : otherBlock ? 'blocked' : 'active');
+        state.textContent = pending ? 'PAYMENT DUE' : otherBlock ? 'BLOCKED' : item && item.PaymentStatus === 'Paid' ? 'PAID' : 'READY';
+        payEl('payment-lock').textContent = pending ? 'Update payment notice' : 'Apply payment lock';
+        payEl('payment-lock').disabled = paymentBusy || !item || otherBlock;
+        payEl('payment-restore').hidden = !pending;
+        payEl('payment-restore').disabled = paymentBusy || !pending || !payEl('payment-confirm').checked;
+        payEl('payment-confirm-wrap').hidden = !pending;
+        payEl('payment-close').disabled = paymentBusy;
+        payEl('payment-help').textContent = otherBlock ? 'This license is already blocked for another reason. Remove that block before applying a payment lock.' : 'Only this license is affected. Payment must be verified manually. Its existing expiry date is unchanged.';
+    }
+    function openPaymentManager(k) {
+        const item = keysMap[k]; if (!item || paymentBusy) return;
+        paymentKey = k; paymentFocus = document.activeElement;
+        payEl('payment-key').textContent = k;
+        payEl('payment-upi').textContent = PAYMENT_UPI;
+        const sourceArt = document.querySelector('.winter-welcome-photo');
+        if (sourceArt) payEl('payment-art').src = sourceArt.src;
+        payEl('payment-amount').value = item.PaymentAmount > 0 ? item.PaymentAmount : '';
+        payEl('payment-message-en').value = item.PaymentMessageEn || PAYMENT_DEFAULTS.en;
+        payEl('payment-message-hi').value = item.PaymentMessageHi || PAYMENT_DEFAULTS.hi;
+        payEl('payment-confirm').checked = false;
+        paymentError(''); setPaymentLanguage('en'); updatePaymentButtons();
+        payEl('payment-overlay').hidden = false;
+        document.body.classList.add('payment-modal-open'); payEl('payment-close').focus();
+    }
+    function closePaymentManager() {
+        if (paymentBusy) return;
+        payEl('payment-overlay').hidden = true;
+        document.body.classList.remove('payment-modal-open');
+        paymentKey = null;
+        if (paymentFocus && paymentFocus.isConnected) paymentFocus.focus();
+    }
+    document.addEventListener('keydown', e => {
+        if (payEl('payment-overlay').hidden) return;
+        if (e.key === 'Escape') { e.preventDefault(); closePaymentManager(); }
+        if (e.key === 'Tab') {
+            const controls = Array.from(payEl('payment-overlay').querySelectorAll('button,input,textarea')).filter(x => !x.disabled && x.getClientRects().length);
+            if (!controls.length) return;
+            if (e.shiftKey && document.activeElement === controls[0]) { e.preventDefault(); controls[controls.length-1].focus(); }
+            else if (!e.shiftKey && document.activeElement === controls[controls.length-1]) { e.preventDefault(); controls[0].focus(); }
+        }
+    });
+    async function copyPaymentText(value) {
+        try {
+            if (window.RexNativeBridge && window.RexNativeBridge.copyToClipboard) window.RexNativeBridge.copyToClipboard(value);
+            else if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(value);
+            else {
+                const tmp = document.createElement('textarea'); tmp.value = value; tmp.style.position = 'fixed'; tmp.style.opacity = '0'; document.body.appendChild(tmp); tmp.select();
+                const success = document.execCommand('copy'); tmp.remove(); if (!success) throw new Error('Clipboard unavailable');
+            }
+            notify('Copied');
+        } catch (_) { paymentError('Clipboard unavailable. Select and copy the notice manually.'); }
+    }
+    function copyPaymentUpi() { copyPaymentText(PAYMENT_UPI); }
+    function copyPaymentNotice() { copyPaymentText(PAYMENT_TITLES[paymentLanguage] + '\n\n' + payEl('payment-message-' + paymentLanguage).value.trim() + '\n\n' + paymentDetails(paymentLanguage)); }
+    function refreshPaymentCache(k, item) {
+        keysMap[k] = item;
+        try {
+            const cached = JSON.parse(localStorage.getItem('rex_instant_snap') || '{}');
+            cached.Keys = cached.Keys || {}; cached.Keys[k] = item;
+            localStorage.setItem('rex_instant_snap', JSON.stringify(cached));
+        } catch (_) {}
+        renderKeyCards(); updatePaymentButtons();
+    }
+    async function savePaymentLock() {
+        if (!paymentKey || paymentBusy) return;
+        const k = paymentKey, raw = payEl('payment-amount').value.trim(), amount = raw ? Number(raw) : null;
+        const en = payEl('payment-message-en').value.trim(), hi = payEl('payment-message-hi').value.trim();
+        if ((raw && (!Number.isFinite(amount) || amount <= 0 || !payEl('payment-amount').checkValidity())) || !en || !hi) { paymentError('Enter a valid positive amount (or leave it blank) and both language notices.'); return; }
+        paymentBusy = true; paymentError(''); updatePaymentButtons();
+        try {
+            const path = 'Keys/' + encodeURIComponent(k);
+            const fresh = await fbRequest(path, 'GET', null);
+            if (!fresh || typeof fresh !== 'object') throw new Error('License no longer exists. Refresh the directory.');
+            if (fresh.Blocked && !isPaymentLocked(fresh)) throw new Error('License is blocked for another reason.');
+            const patch = { Blocked:true, Status:'Blocked', BlockReason:'Payment Pending', PaymentRequired:true, PaymentStatus:'Pending', PaymentUpi:PAYMENT_UPI, PaymentAmount:amount, PaymentCurrency:'INR', PaymentTitleEn:PAYMENT_TITLES.en, PaymentTitleHi:PAYMENT_TITLES.hi, PaymentMessageEn:en, PaymentMessageHi:hi, PaymentButtonEn:'Pay & Continue', PaymentButtonHi:'भुगतान करें और आगे बढ़ें', PaymentUpdatedAt:new Date().toISOString(), PaymentConfirmedAt:null };
+            await fbRequest(path, 'PATCH', patch);
+            refreshPaymentCache(k, Object.assign({},fresh,patch));
+            notify('Payment lock saved');
+        } catch (err) { paymentError('Payment lock not saved: ' + err.message); }
+        finally { paymentBusy = false; updatePaymentButtons(); }
+    }
+    async function restorePaidLicense() {
+        if (!paymentKey || paymentBusy || !payEl('payment-confirm').checked) return;
+        const k = paymentKey; paymentBusy = true; paymentError(''); updatePaymentButtons();
+        try {
+            const path = 'Keys/' + encodeURIComponent(k);
+            const fresh = await fbRequest(path, 'GET', null);
+            if (!isPaymentLocked(fresh)) throw new Error('No pending payment lock found. Refresh the directory.');
+            if (fresh.BlockReason && fresh.BlockReason !== 'Payment Pending') throw new Error('A separate block is present. Review this license first.');
+            const patch = { Blocked:false, Status:isExpiredDate(fresh.Expiry) ? 'Expired' : (fresh.Device ? 'Active' : 'Inactive'), BlockReason:null, PaymentRequired:false, PaymentStatus:'Paid', PaymentConfirmedAt:new Date().toISOString(), PaymentUpdatedAt:new Date().toISOString() };
+            await fbRequest(path, 'PATCH', patch);
+            refreshPaymentCache(k, Object.assign({},fresh,patch));
+            payEl('payment-confirm').checked = false;
+            notify('Payment confirmed • lock removed');
+            if (isExpiredDate(fresh.Expiry)) paymentError('Payment lock removed. The license is still expired; renew separately if needed.');
+        } catch(err) { paymentError('Access not restored: ' + err.message); }
+        finally { paymentBusy = false; updatePaymentButtons(); }
     }
 
     async function deleteLicense(k) {
